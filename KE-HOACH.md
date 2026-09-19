@@ -30,6 +30,7 @@ Mỗi bước là một script trong `scripts/` (gộp DTBook và SMIL/NCX/OPF v
 | Chú thích `[n]` | `<noteref>` trong thân, `<note>` gom vào `<rearmatter>` "Chú thích", có audio riêng | đúng DTBook; trình đọc có skip logic bật/tắt; đọc chèn giữa câu phá mạch truyện | xoá hẳn (mất thông tin) | không |
 | Mã hoá mp3 | `lameenc` (LAME qua pip) | không phụ thuộc ffmpeg (máy không có); pip cài được trong `requirements.txt` | ffmpeg (cài ngoài Python) | cần bitrate thay đổi |
 | Python | **3.12** | VieNeu hỗ trợ 3.10–3.13, repo ghim 3.12; onnxruntime chưa có wheel 3.14 | 3.14 (venv cũ) | VieNeu hỗ trợ 3.14 |
+| Khoảng nghỉ khi ghép | giữa câu **0,7 s** nghe được (0,6 + 2×0,05 lề), cuối đoạn 1,2 s, sau tiêu đề 1,7–2,0 s | **đo chính VieNeu**: đọc liền 12 cặp câu, nó tự nghỉ trung vị 0,71 s (0,52–0,89); người nghe phát hiện 0,45 s cũ là "sát, không tự nhiên" | giữ im lặng gốc của từng clip (dao động 0,15–0,37 s, không đều) | đổi giọng (mỗi giọng nhịp khác) → đo lại bằng đoạn code trong mục cạm bẫy 7 |
 | Nhận diện cấu trúc | theo **font** (Arial-BoldMT 21 = tháng, Arial-BoldItalicMT 16 = truyện, BoldItal 16 sau h2 = dòng ngày, size 12 = chú thích) | PDF do calibre sinh, font nhất quán 100% qua khảo sát; bookmark chỉ để đối chiếu | heuristic chữ hoa / vị trí | đổi sách khác |
 
 ## Tiêu chí "xong" (kiểm chứng được)
@@ -49,3 +50,4 @@ Mỗi bước là một script trong `scripts/` (gộp DTBook và SMIL/NCX/OPF v
 4. Lần `infer` đầu tiên của VieNeu chậm gấp 3 (khởi tạo graph ONNX) → làm nóng trước khi đo RTF.
 5. pymupdf tách block khi trong dòng có span chú thích `[n]` (đổi chiều cao dòng) và gộp tiêu đề ngắn với dòng ngày → phân loại theo **dòng** rồi nối đoạn theo dấu câu + chữ thường.
 6. Số đọc thành chữ dài ("4,444 km" → 7 s) kích hoạt cảnh báo "chậm bất thường" — không phải lỗi, nhưng QA phải nghe lại.
+7. **Khoảng nghỉ giữa câu quá sát** khi ghép clip rời: TTS từng câu làm mất nhịp nghỉ tự nhiên. Không đoán số — cho VieNeu đọc liền từng cặp câu, tìm khoảng im lặng dài nhất ở giữa (ngưỡng 0,01, 48 kHz) → trung vị 0,71 s; đặt `PAUSE_AFTER` theo đó. Bước 3 lưu `pauses` vào `timing.json` để tự ghép lại khi cấu hình đổi.

@@ -56,7 +56,7 @@ def build_group(group, units):
     out = MP3_DIR / f"{group}.mp3"
     if out.exists() and out.stat().st_mtime > max(w.stat().st_mtime for w in wavs) and TIMING.exists():
         old = json.loads(TIMING.read_text(encoding="utf-8")).get(group)
-        if old:
+        if old and old.get("pauses") == PAUSE_AFTER:      # đổi khoảng nghỉ → phải ghép lại
             return old, "giữ nguyên"
     parts, clips, pos = [], [], 0
     for u, w in zip(units, wavs):
@@ -72,7 +72,8 @@ def build_group(group, units):
     pcm = np.concatenate(parts)
     MP3_DIR.mkdir(parents=True, exist_ok=True)
     encode_mp3(pcm, out)
-    return {"mp3": out.name, "duration": round(len(pcm) / SR, 3), "clips": clips}, "ghép mới"
+    return {"mp3": out.name, "duration": round(len(pcm) / SR, 3), "pauses": PAUSE_AFTER,
+            "clips": clips}, "ghép mới"
 
 
 def main():
