@@ -28,6 +28,7 @@ SR = 48_000
 BITRATE_KBPS = 64          # mono 48 kHz: sách nói DAISY thường 32–64 kbps; 9,9 h ≈ 285 MB
 SILENCE_THRESHOLD = 0.01   # biên độ coi là im lặng (float32, đỉnh = 1.0)
 KEEP_MARGIN_S = 0.05       # giữ lại 50 ms im lặng thật ở hai đầu clip sau khi cắt
+LAYOUT = 2                 # cách tính clip; đổi số này → timing.json cũ bị coi là lỗi thời, ghép lại hết
 
 
 def trim(audio):
@@ -56,24 +57,26 @@ def build_group(group, units):
     out = MP3_DIR / f"{group}.mp3"
     if out.exists() and out.stat().st_mtime > max(w.stat().st_mtime for w in wavs) and TIMING.exists():
         old = json.loads(TIMING.read_text(encoding="utf-8")).get(group)
-        if old and old.get("pauses") == PAUSE_AFTER:      # đổi khoảng nghỉ → phải ghép lại
+        if old and old.get("pauses") == PAUSE_AFTER and old.get("layout") == LAYOUT:
             return old, "giữ nguyên"
     parts, clips, pos = [], [], 0
     for u, w in zip(units, wavs):
         audio, sr = sf.read(w, dtype="float32")
         assert sr == SR, f"{w}: {sr} Hz, cần {SR}"
         audio = trim(audio)
-        clips.append([u.id, round(pos / SR, 3), round((pos + len(audio)) / SR, 3)])
         pause = PAUSE_AFTER["para_end" if u.para_end and u.kind == "sent" else
                             "note_end" if u.para_end and u.kind == "note_sent" else u.kind]
         gap = np.zeros(int(pause * SR), dtype=np.float32)
+        # Clip BAO LUÔN khoảng nghỉ sau câu: trình đọc DAISY phát clipBegin→clipEnd rồi nhảy
+        # ngay sang clip kế, im lặng nằm giữa hai clip sẽ bị bỏ qua → câu dính nhau.
+        clips.append([u.id, round(pos / SR, 3), round((pos + len(audio) + len(gap)) / SR, 3)])
         parts += [audio, gap]
         pos += len(audio) + len(gap)
     pcm = np.concatenate(parts)
     MP3_DIR.mkdir(parents=True, exist_ok=True)
     encode_mp3(pcm, out)
     return {"mp3": out.name, "duration": round(len(pcm) / SR, 3), "pauses": PAUSE_AFTER,
-            "clips": clips}, "ghép mới"
+            "layout": LAYOUT, "clips": clips}, "ghép mới"
 
 
 def main():

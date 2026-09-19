@@ -27,7 +27,7 @@ make trial                               # ~3 phút: 1 truyện + chú thích �
 make all                                 # cả sách: ~70 phút trên Apple M5 Pro (RTF 0,12)
 ```
 
-Nghe thử: `brew install --cask thorium` → mở Thorium Reader → Import `out/Nhung_tam_long_cao_ca/package.opf`.
+Nghe thử: `brew install --cask thorium`, nén thư mục sách (`cd out && zip -0 -r sach.zip Nhung_tam_long_cao_ca`) rồi Import **file zip** vào Thorium Reader — import thẳng `package.opf` Thorium sẽ không nhận audio mà đọc bằng TTS hệ thống.
 
 ### Windows (PowerShell)
 
@@ -45,7 +45,7 @@ $py = ".venv\Scripts\python.exe"
 & $py scripts\02_tts.py                  # cả sách (~70 phút M-series; x86 chậm hơn ~4×), rồi chạy lại bước 3-4
 ```
 
-Nghe thử: cài [Thorium Reader](https://thorium.edrlab.org) (Microsoft Store) hoặc Dolphin EasyReader → Import `out\Nhung_tam_long_cao_ca\package.opf`.
+Nghe thử: cài [Thorium Reader](https://thorium.edrlab.org) (Microsoft Store) hoặc Dolphin EasyReader → nén thư mục `out\Nhung_tam_long_cao_ca` thành zip rồi Import **file zip** (không import `package.opf` lẻ).
 
 Nếu PowerShell chặn script (`irm ... | iex`): `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`. Nếu `py` không có: dùng `python`.
 
