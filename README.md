@@ -4,26 +4,54 @@ Chuyển PDF có text sang sách nói DAISY 3 (văn bản + audio đồng bộ *
 
 Đồ án môn Xử lý tiếng nói. Hướng dẫn gốc: `input/[VR] DAISY Guidelines.pdf`. Quyết định kỹ thuật và lý do: [KE-HOACH.md](KE-HOACH.md).
 
-## Bắt đầu trong 5 phút
+## Cài đặt
 
-Cần: macOS/Linux/Windows, Python **3.12** qua [uv](https://docs.astral.sh/uv/) (`brew install uv`), ≥ 8 GB RAM, ≥ 10 GB đĩa, mạng cho lần tải model đầu (~1 GB).
+Cần ≥ 8 GB RAM, ≥ 10 GB đĩa trống, mạng cho lần tải model đầu (~1 GB). VieNeu-TTS chỉ chạy trên **Python 3.10–3.13**; `scripts/setup.py` tự xử lý việc này:
+
+| Máy đang có | `setup.py` làm gì |
+|---|---|
+| Python 3.10–3.13 | dùng luôn: tạo `.venv` bằng `python -m venv`, cài `requirements.txt` bằng pip |
+| Python khác (3.9, 3.14…) | cài [uv](https://docs.astral.sh/uv/) qua pip, uv **tự tải Python 3.12** và tạo `.venv` |
+| Đã có uv | dùng uv luôn, không cần Python đúng bản |
+
+Cuối cùng nó chạy `00_check_env.py` và in bảng `[OK]/[WARN]/[FAIL]`.
+
+### macOS / Linux
 
 ```bash
+# Chưa có git/python: xcode-select --install (macOS)   |   sudo apt install git python3 python3-venv (Ubuntu)
 git clone <repo> && cd daisy
-make setup        # tạo .venv + cài thư viện
-make check-tts    # kiểm máy, tải model, đọc thử 1 câu → in RTF và ước lượng thời gian
-make trial        # ~3 phút: dựng thử 1 truyện + chú thích → out/Nhung_tam_long_cao_ca/
+python3 scripts/setup.py                 # hoặc: make setup
+make check-tts                           # tải model, đọc thử 1 câu → RTF + ước lượng thời gian
+make trial                               # ~3 phút: 1 truyện + chú thích → out/Nhung_tam_long_cao_ca/
+make all                                 # cả sách: ~70 phút trên Apple M5 Pro (RTF 0,12)
 ```
 
-Mở `out/Nhung_tam_long_cao_ca/package.opf` bằng [Thorium Reader](https://thorium.edrlab.org) (`brew install --cask thorium`) hoặc Dolphin EasyReader để nghe và nhảy mục lục.
+Nghe thử: `brew install --cask thorium` → mở Thorium Reader → Import `out/Nhung_tam_long_cao_ca/package.opf`.
 
-Làm trọn cuốn:
+### Windows (PowerShell)
 
-```bash
-make all          # ~70 phút trên Apple M5 Pro (RTF 0,12); x86 chậm hơn ~4×
+Cài [Git](https://git-scm.com/download/win) và Python từ [python.org](https://www.python.org/downloads/) (tick **Add python.exe to PATH**; bản nào cũng được, `setup.py` sẽ tự lo Python 3.12 nếu cần). Windows không có `make`, chạy thẳng script:
+
+```powershell
+git clone <repo>; cd daisy
+py -3 scripts\setup.py                   # hoặc: python scripts\setup.py
+$py = ".venv\Scripts\python.exe"
+& $py scripts\00_check_env.py --tts      # kiểm máy + đọc thử
+& $py scripts\01_extract_pdf.py          # bước 1
+& $py scripts\02_tts.py front lv1-02 lv2-001 notes   # bước 2, dựng thử vài nhóm (~3 phút)
+& $py scripts\03_concat_mp3.py           # bước 3
+& $py scripts\04_build_daisy.py          # bước 4 → out\Nhung_tam_long_cao_ca\
+& $py scripts\02_tts.py                  # cả sách (~70 phút M-series; x86 chậm hơn ~4×), rồi chạy lại bước 3-4
 ```
 
-Chạy dở dang cứ `make all` lại — bước TTS bỏ qua câu đã có wav.
+Nghe thử: cài [Thorium Reader](https://thorium.edrlab.org) (Microsoft Store) hoặc Dolphin EasyReader → Import `out\Nhung_tam_long_cao_ca\package.opf`.
+
+Nếu PowerShell chặn script (`irm ... | iex`): `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`. Nếu `py` không có: dùng `python`.
+
+### Chạy dở dang
+
+Cứ chạy lại lệnh cũ — bước TTS bỏ qua câu đã có wav, bước 3 bỏ qua nhóm đã có mp3 mới hơn wav. Muốn đọc lại một truyện: xoá `build/wav/<nhóm>/` rồi chạy lại.
 
 ## Nộp bài
 
@@ -68,7 +96,7 @@ Thêm bước mới → file `scripts/0N_ten.py` + target trong `Makefile`; thê
 ## Cạm bẫy đã gặp
 
 - **onnxruntime ≥ 1.30 từ chối model qua symlink** của HuggingFace cache. Script đã đặt `HF_HUB_DISABLE_SYMLINKS=1`; nếu từng tải model trước khi dùng repo này, `make check` báo FAIL kèm lệnh xoá cache.
-- **Python 3.14** không cài được VieNeu (chỉ 3.10–3.13) → `make setup` ghim 3.12.
+- **Python 3.14** không cài được VieNeu (chỉ 3.10–3.13) → `scripts/setup.py` kiểm phiên bản, lệch thì dùng uv tải 3.12.
 - Lần `infer` đầu tiên chậm gấp 3 (khởi tạo graph) — `check-tts` đã làm nóng trước khi đo.
 - PDF do calibre sinh mất chữ **Â hoa** ("châu u") → `SOURCE_FIXES` trong `01_extract_pdf.py`.
 - pymupdf tách block khi có chú thích `[n]` đổi chiều cao dòng → quy tắc nối đoạn theo dấu câu + chữ thường.

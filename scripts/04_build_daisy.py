@@ -16,6 +16,9 @@ import shutil
 import sys
 from xml.sax.saxutils import escape, quoteattr
 
+# Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from book_units import (BUILD, FRONT_GROUP, NOTES_GROUP, NOTES_H1_ID, NOTES_TITLE, ROOT,
                         groups_in_order, iter_units, load_book, load_metadata)
 

@@ -1,8 +1,7 @@
 # Sách nói DAISY 3 — Những tấm lòng cao cả.  `make help` để xem lệnh.
-# Mọi target chạy trong .venv của repo; cần `uv` (https://docs.astral.sh/uv/) — hoặc đặt PY=python3.12 nếu tự tạo venv.
+# Mọi target chạy trong .venv của repo (tạo bằng `make setup`). Windows không có make: xem README, chạy thẳng scripts/*.py.
 
 PY      ?= .venv/bin/python
-UV      ?= uv
 GROUPS  ?= front lv1-02 lv2-001 notes   # nhóm dùng cho `make trial`; xem id trong build/book.json
 SHELL   := /bin/bash
 
@@ -11,9 +10,8 @@ SHELL   := /bin/bash
 help: ## Liệt kê lệnh
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-setup: ## Tạo .venv Python 3.12 và cài thư viện (chạy 1 lần)
-	$(UV) venv --python 3.12 .venv
-	$(UV) pip install --python $(PY) -r requirements.txt
+setup: ## Tạo .venv + cài thư viện bằng Python có sẵn; Python không phải 3.10–3.13 thì tự cài uv và tải 3.12
+	python3 scripts/setup.py
 
 check: ## Kiểm tra máy: Python, thư viện, RAM, đĩa, cache model
 	$(PY) scripts/00_check_env.py

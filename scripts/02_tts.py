@@ -13,6 +13,8 @@ import os
 import sys
 import time
 
+# Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 # Phải đặt TRƯỚC khi import vieneu: onnxruntime ≥1.30 từ chối file .data qua symlink của HF cache
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS", "1")
 
@@ -58,7 +60,7 @@ def main(only):
             if k % 50 == 0 or k == len(todo):
                 el = time.time() - t_start
                 print(f"  {k}/{len(todo)}  audio {audio_sec/60:.1f} phút  "
-                      f"máy {el/60:.1f} phút  RTF {el/audio_sec:.2f}  còn ~{el/k*(len(todo)-k)/60:.0f} phút")
+                      f"máy {el/60:.1f} phút  RTF {el/audio_sec:.2f}  còn ~{el/k*(len(todo)-k)/60:.0f} phút", flush=True)
 
 
 if __name__ == "__main__":

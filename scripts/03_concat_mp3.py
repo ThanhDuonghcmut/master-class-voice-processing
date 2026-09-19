@@ -13,6 +13,9 @@ mọi wav của nó thì không ghép lại.
 import json
 import sys
 
+# Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 import lameenc
 import numpy as np
 import soundfile as sf

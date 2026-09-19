@@ -14,6 +14,8 @@ import sys
 import time
 from pathlib import Path
 
+# Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS", "1")
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +39,7 @@ def check_python():
     ok = (3, 10) <= (v.major, v.minor) <= (3, 13)
     report("OK" if ok else "FAIL",
            f"Python {v.major}.{v.minor}.{v.micro} — VieNeu cần 3.10–3.13"
-           + ("" if ok else ". Tạo lại venv: uv venv --python 3.12 .venv"))
+           + ("" if ok else ". Xoá .venv rồi chạy: python3 scripts/setup.py"))
 
 
 def check_packages():
@@ -61,6 +63,11 @@ def check_hardware():
             ram = int(os.popen("sysctl -n hw.memsize").read()) / 2**30
         elif sys.platform.startswith("linux"):
             ram = int(next(l for l in open("/proc/meminfo") if l.startswith("MemTotal")).split()[1]) / 2**20
+        elif sys.platform == "win32":
+            import ctypes
+            kb = ctypes.c_ulonglong(0)
+            ctypes.windll.kernel32.GetPhysicallyInstalledSystemMemory(ctypes.byref(kb))
+            ram = kb.value / 2**20
     except Exception:
         pass
     if ram is None:

@@ -5,8 +5,11 @@
     .venv/bin/python scripts/list_voices.py
 """
 import os
+import sys
 import time
 
+# Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS", "1")
 
 import numpy as np

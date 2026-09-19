@@ -10,6 +10,9 @@ import json
 import sys
 import zipfile
 
+# Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from book_units import BUILD, ROOT, groups_in_order, load_book, load_metadata
 
 
