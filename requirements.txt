@@ -1,0 +1,5 @@
+# Cài: uv pip install --python .venv/bin/python -r daisy/requirements.txt
+# Python 3.12 (VieNeu chưa hỗ trợ 3.14)
+vieneu==3.8.1      # TTS tiếng Việt, ONNX CPU (kéo theo onnxruntime, soundfile, numpy)
+pymupdf==1.28.2    # trích text + font từ PDF
+lameenc==1.8.1     # mã hoá mp3 không cần ffmpeg

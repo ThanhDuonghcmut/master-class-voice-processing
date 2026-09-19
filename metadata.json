@@ -1,0 +1,18 @@
+{
+  "_ghi_chu": "9 trường bắt buộc theo slide 17 của [VR] DAISY Guidelines. Giá trị bắt đầu bằng CHUA_DIEN sẽ làm bước 5 dừng lại.",
+  "title": "Những tấm lòng cao cả",
+  "creator": "Edmondo De Amicis",
+  "contributor": "Hoàng Thiếu Sơn (dịch)",
+  "subject": "Văn học & Tiểu thuyết",
+  "description": "Nhật ký một năm học của cậu bé Enrico lớp ba ở Torino: những câu chuyện về thầy cô, bạn bè, gia đình và các truyện đọc hàng tháng, đề cao lòng nhân ái, tình yêu nước và nghĩa vụ.",
+  "publisher": "Nhà xuất bản Hội Nhà Văn",
+  "date": "2000",
+  "source": "CHUA_DIEN_ISBN",
+  "language": "vi",
+  "sourceURL": "CHUA_DIEN_URL",
+  "note": "Audio sinh bằng VieNeu-TTS v3 Turbo, giọng Đức Trí. Chú thích cuối sách gom vào phần Chú thích, đánh dấu skippable.",
+  "collector": "CHUA_DIEN_TEN_NGUOI_DONG_GOP",
+  "mshv": ["CHUA_DIEN_MSHV1"],
+  "slug": "Nhung_tam_long_cao_ca",
+  "narrator": "VieNeu-TTS v3 Turbo — Đức Trí"
+}
