@@ -1,6 +1,6 @@
 # Kế hoạch: sách nói DAISY 3 — *Những tấm lòng cao cả*
 
-Đồ án môn Xử lý tiếng nói (K35). Hướng dẫn gốc: `../[VR] DAISY Guidelines.pdf`. Bộ mẫu của nhóm K34: `../mau/`.
+Đồ án môn Xử lý tiếng nói (K35). Hướng dẫn gốc: `input/[VR] DAISY Guidelines.pdf`. Bộ mẫu của nhóm K34 nằm ngoài repo (thư mục `mau/` cạnh repo).
 
 ## Bài toán
 
