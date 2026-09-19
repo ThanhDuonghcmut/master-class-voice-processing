@@ -18,9 +18,10 @@ NOTES_TITLE = "Chú thích"
 # Khoảng nghỉ (giây) chèn SAU mỗi loại đơn vị khi ghép mp3. Mỗi clip còn giữ 0,05 s im lặng
 # thật ở hai đầu (03_concat_mp3.KEEP_MARGIN_S) nên khoảng nghe được = giá trị này + 0,1 s.
 # Chuẩn đo 2026-09-19: cho VieNeu (Đức Trí) đọc liền 12 cặp câu → nó tự nghỉ giữa câu
-# trung vị 0,71 s (0,52–0,89). Giá trị 0,35 cũ nghe sát; các mốc khác nhân theo tỷ lệ.
-PAUSE_AFTER = {"front": 1.6, "h1": 1.9, "h2": 1.6, "dateline": 1.1, "sent": 0.6, "para_end": 1.1,
-               "note_h1": 1.4, "note_sent": 0.6, "note_end": 0.9}
+# trung vị 0,71 s (0,52–0,89). 0,35 cũ nghe sát; 0,6 (=0,7 nghe được) người nghe vẫn thấy
+# hơi nhanh → lấy mức trên của dải đo: 0,8 (=0,9 nghe được); các mốc khác nới theo tỷ lệ.
+PAUSE_AFTER = {"front": 1.8, "h1": 2.2, "h2": 1.8, "dateline": 1.3, "sent": 0.8, "para_end": 1.4,
+               "note_h1": 1.6, "note_sent": 0.8, "note_end": 1.1}
 
 
 @dataclass
