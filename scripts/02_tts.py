@@ -53,7 +53,7 @@ def main(only):
             sf.write(out, np.asarray(audio, dtype=np.float32), SAMPLE_RATE, subtype="PCM_16")
             rec = {"group": group, "id": uid, "chars": len(text), "sec": round(dur, 3),
                    "compute": round(time.time() - t0, 3)}
-            if dur / max(len(text), 1) > SLOW_SEC_PER_CHAR:
+            if len(text) >= 20 and dur / len(text) > SLOW_SEC_PER_CHAR:   # text ngắn luôn "chậm" giả
                 rec["warn"] = "chậm bất thường, nghe lại"
             log.write(json.dumps(rec, ensure_ascii=False) + "\n")
             audio_sec += dur

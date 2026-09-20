@@ -37,6 +37,7 @@ MIN_SENT_CHARS = 12  # câu ngắn hơn ("Ôi!") gộp vào câu kế: TTS dễ 
 # Lỗi trong PDF nguồn, sửa trước khi tách câu. Mỗi dòng phải có lý do.
 SOURCE_FIXES = {
     "châu u ": "châu Âu ",   # calibre làm mất chữ "Â" hoa (chỉ 1 chỗ, đã rà toàn sách)
+    "4,444 km": "4 phẩy 444 km",  # VieNeu coi dấu phẩy là phân cách nghìn → "bốn nghìn"; chỗ duy nhất có số lẻ
 }
 
 
