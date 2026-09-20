@@ -4,7 +4,7 @@
 PY      ?= .venv/bin/python
 PY3     := $(shell command -v python3 || command -v python || echo py -3)   # Python hệ thống cho QA/setup (Windows Git Bash: python hoặc py -3)
 GROUPS  ?= front lv1-02 lv2-001 lv2-002 lv2-004   # nhóm dùng cho `make trial`; xem id trong build/book.json
-QA_CSV  ?= qa/*.csv                              # file đồng đội xuất từ trang QA
+QA_CSV  ?= qa/*.csv                              # file người nghe xuất từ trang QA
 OPEN    := $(shell command -v open || command -v xdg-open)
 SHELL   := /bin/bash
 
@@ -27,7 +27,7 @@ qa-check: ## Chỉ kiểm máy cho QA (git, Python, đĩa, cổng)
 fetch: ## Tải lại sách + qa.html từ release mới nhất (khi có bản mới)
 	$(PY3) scripts/qa.py fetch --force
 
-merge-qa: ## Gộp CSV đồng đội (QA_CSV=qa/*.csv) vào sua_cach_doc.csv, rồi điền tay cột speech
+merge-qa: ## Gộp CSV người nghe (QA_CSV=qa/*.csv) vào sua_cach_doc.csv, rồi điền tay cột speech
 	$(PY) scripts/gop_qa.py $(QA_CSV)
 
 fix: extract tts mp3 daisy ## Áp sua_cach_doc.csv: chỉ đọc lại câu có bản đọc đổi, ghép lại, dựng lại sách
@@ -59,11 +59,11 @@ mp3: ## Bước 3: ghép wav → mp3 + timing.json (nhóm nào đủ wav mới g
 daisy: ## Bước 4: sinh dtbook/smil/ncx/opf/css → out/<slug>/ + out/qa.html
 	$(PY) scripts/04_build_daisy.py
 
-release: ## Đưa sách lên GitHub Release cho đồng đội QA: make release TAG=v0.2-qa
+release: ## Đưa sách lên GitHub Release để QA: make release TAG=v0.2-qa
 	@test -n "$(TAG)" || { echo "Thiếu TAG=vX.Y-qa"; exit 1; }
 	@slug=$$($(PY) -c 'import json;print(json.load(open("metadata.json"))["slug"])'); \
 	  rm -f out/$$slug.zip && (cd out/$$slug && zip -q -0 ../$$slug.zip *) && \
-	  gh release create $(TAG) out/$$slug.zip out/qa.html --title "$(TAG)" --notes "Sách DAISY + trang QA. Đồng đội: make qa (tự tải)." && rm out/$$slug.zip
+	  gh release create $(TAG) out/$$slug.zip out/qa.html --title "$(TAG)" --notes "Sách DAISY + trang QA. Người nghe: make qa (tự tải)." && rm out/$$slug.zip
 
 package: ## Bước 5: bản nộp — kiểm metadata đủ, zip + sha256 vào out/<MSHV>/
 	$(PY) scripts/04_build_daisy.py --strict

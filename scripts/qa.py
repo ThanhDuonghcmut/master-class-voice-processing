@@ -1,4 +1,4 @@
-"""QA sách nói — mọi thứ đồng đội cần, CHỈ dùng thư viện chuẩn (không cần .venv, không cần model).
+"""QA sách nói — mọi thứ người nghe cần, CHỈ dùng thư viện chuẩn (không cần .venv, không cần model).
 
     make qa            → qa.py          : kiểm máy, thiếu sách → tải từ GitHub Release, mở http://localhost:8765/qa.html
     make submit-qa     → qa.py submit   : commit + push mọi CSV mới trong qa/

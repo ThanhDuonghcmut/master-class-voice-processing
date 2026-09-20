@@ -4,7 +4,7 @@ Chuyển PDF có text sang sách nói DAISY 3 (văn bản + audio đồng bộ *
 
 Đồ án môn Xử lý tiếng nói. Hướng dẫn gốc: `input/[VR] DAISY Guidelines.pdf`. Quyết định kỹ thuật và lý do: [KE-HOACH.md](KE-HOACH.md).
 
-## Đồng đội: QA trong 3 lệnh (không cần cài model, không cần venv)
+## QA (nghe và ghi nhận lỗi) trong 3 lệnh (không cần cài model, không cần venv)
 
 Cần **Git**, **Python 3** (bản nào cũng được) và **make**:
 
@@ -53,7 +53,7 @@ make merge-qa        # gộp qa/*.csv vào sua_cach_doc.csv (mỗi id một dòn
 # mở sua_cach_doc.csv, điền cột speech = bản đọc mới cho từng id
 make fix             # chỉ đọc lại câu có bản đọc đổi (vài giây/câu), ghép lại, dựng sách + trang QA
 make qa              # nghe lại đúng các câu đó
-make release TAG=v0.2-qa   # đưa bản mới lên GitHub Release cho đồng đội
+make release TAG=v0.2-qa   # đưa bản mới lên GitHub Release cho người nghe
 ```
 
 `sua_cach_doc.csv` chỉ đổi **bản đọc**; chữ hiển thị trong sách vẫn là nguyên văn. Cột `speech` trống = đã ghi nhận, chưa sửa. Cách chữa hay dùng: thêm dấu phẩy để ép ngắt nhịp ("Thầy giáo mới, ngay từ sáng…"), viết số thành chữ ("4 phẩy 444"), phiên âm tên riêng.
@@ -129,7 +129,7 @@ flowchart LR
 | `out/` | sách DAISY và zip nộp, không commit | — |
 | `metadata.json` | 9 trường slide 17 + MSHV | — |
 | `sua_cach_doc.csv` | bản đọc sửa theo id câu (kết quả QA) | chữ hiển thị |
-| `qa/` | CSV đồng đội xuất từ trang QA, đầu vào của `make merge-qa` | — |
+| `qa/` | CSV người nghe xuất từ trang QA, đầu vào của `make merge-qa` | — |
 | `scripts/qa.py` | tải sách từ Release, server trang QA, nộp CSV — **stdlib thuần**, không cần venv | — |
 
 Thêm bước mới → file `scripts/0N_ten.py` + target trong `Makefile`; thêm loại đơn vị đọc → sửa `book_units.py` (2–4 tự khớp).

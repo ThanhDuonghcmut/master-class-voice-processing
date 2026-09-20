@@ -1,4 +1,4 @@
-"""Gộp các file qa_*.csv đồng đội xuất từ trang QA vào sua_cach_doc.csv.
+"""Gộp các file qa_*.csv người nghe xuất từ trang QA vào sua_cach_doc.csv.
 
 Mỗi id chỉ một dòng: id đã có thì nối thêm ghi chú (không ghi đè cột speech đã sửa).
 Cột speech để trống = mới ghi nhận, chưa sửa cách đọc; người sửa điền tay rồi `make all`.
