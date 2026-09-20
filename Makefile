@@ -2,6 +2,7 @@
 # Mọi target chạy trong .venv của repo (tạo bằng `make setup`). Windows không có make: xem README, chạy thẳng scripts/*.py.
 
 PY      ?= .venv/bin/python
+PY3     := $(shell command -v python3 || command -v python || echo py -3)   # Python hệ thống cho QA/setup (Windows Git Bash: python hoặc py -3)
 GROUPS  ?= front lv1-02 lv2-001 lv2-002 lv2-004   # nhóm dùng cho `make trial`; xem id trong build/book.json
 QA_CSV  ?= qa/*.csv                              # file đồng đội xuất từ trang QA
 OPEN    := $(shell command -v open || command -v xdg-open)
@@ -14,14 +15,17 @@ help: ## Liệt kê lệnh
 
 # ---------- QA: nghe, ghi nhận, sửa cách đọc ----------
 
-qa: ## Mở trang QA (không cần .venv): thiếu sách thì tải từ GitHub Release; Xuất CSV ghi thẳng vào qa/
-	python3 scripts/qa.py
+qa: ## QA (không cần .venv): kiểm máy → thiếu sách thì tải từ GitHub Release → mở trang nghe; Xuất CSV ghi vào qa/
+	$(PY3) scripts/qa.py
 
-submit-qa: ## Commit + push mọi CSV mới trong qa/
-	python3 scripts/qa.py submit
+submit-qa: ## Nghe xong: commit + push mọi CSV mới trong qa/
+	$(PY3) scripts/qa.py submit
+
+qa-check: ## Chỉ kiểm máy cho QA (git, Python, đĩa, cổng)
+	$(PY3) scripts/qa.py check
 
 fetch: ## Tải lại sách + qa.html từ release mới nhất (khi có bản mới)
-	python3 scripts/qa.py fetch --force
+	$(PY3) scripts/qa.py fetch --force
 
 merge-qa: ## Gộp CSV đồng đội (QA_CSV=qa/*.csv) vào sua_cach_doc.csv, rồi điền tay cột speech
 	$(PY) scripts/gop_qa.py $(QA_CSV)
@@ -32,7 +36,7 @@ fix: extract tts mp3 daisy ## Áp sua_cach_doc.csv: chỉ đọc lại câu có 
 # ---------- Dựng sách ----------
 
 setup: ## Tạo .venv + cài thư viện bằng Python có sẵn; Python không phải 3.10–3.13 thì tự cài uv và tải 3.12
-	python3 scripts/setup.py
+	$(PY3) scripts/setup.py
 
 check: ## Kiểm tra máy: Python, thư viện, RAM, đĩa, cache model
 	$(PY) scripts/00_check_env.py
@@ -92,4 +96,4 @@ clean-mp3: ## Xoá mp3 + timing (giữ wav — sinh lại bằng make mp3, vài 
 clean-all: ## Xoá toàn bộ build/ và out/ — CẢ WAV (70 phút TTS)
 	rm -rf build out
 
-.PHONY: help qa submit-qa fetch merge-qa fix release setup check check-tts extract tts tts-groups mp3 daisy package trial all thorium voices validate clean-out clean-mp3 clean-all
+.PHONY: help qa submit-qa qa-check fetch merge-qa fix release setup check check-tts extract tts tts-groups mp3 daisy package trial all thorium voices validate clean-out clean-mp3 clean-all

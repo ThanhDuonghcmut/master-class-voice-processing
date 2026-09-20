@@ -1,10 +1,9 @@
 """QA sách nói — mọi thứ đồng đội cần, CHỈ dùng thư viện chuẩn (không cần .venv, không cần model).
 
-    python3 scripts/qa.py            # thiếu sách → tải từ GitHub Release; rồi mở trang QA http://localhost:8765/qa.html
-    python3 scripts/qa.py submit     # commit + push mọi CSV mới trong qa/
-    python3 scripts/qa.py fetch      # chỉ tải/cập nhật sách từ release mới nhất (--force để tải lại)
-
-Windows: thay `python3` bằng `py -3` (hoặc `python`).
+    make qa            → qa.py          : kiểm máy, thiếu sách → tải từ GitHub Release, mở http://localhost:8765/qa.html
+    make submit-qa     → qa.py submit   : commit + push mọi CSV mới trong qa/
+    make fetch         → qa.py fetch --force : tải lại sách khi có release mới
+    make qa-check      → qa.py check    : chỉ kiểm máy
 
 Trang mở bằng file:// không được trình duyệt cho ghi file, nên trang chạy qua server này; nút Xuất
 POST về /save → qa/qa_<ten>_<YYYY-MM-DD_HHMMSS>.csv trong repo.
@@ -28,6 +27,37 @@ OUT, QA = ROOT / "out", ROOT / "qa"
 SLUG = json.loads((ROOT / "metadata.json").read_text(encoding="utf-8"))["slug"]
 BOOK_DIR, QA_HTML = OUT / SLUG, OUT / "qa.html"
 PORT = 8765
+
+
+# ---------- tiền kiểm ----------
+def check():
+    """Mọi thứ QA cần; in [OK]/[FAIL], thoát 1 nếu FAIL."""
+    import shutil
+    import socket
+    fails = 0
+
+    def report(ok, msg, fix=""):
+        nonlocal fails
+        fails += not ok
+        print(f"[{'OK' if ok else 'FAIL'}] {msg}" + ("" if ok else f" → {fix}"))
+
+    v = sys.version_info
+    report(v >= (3, 8), f"Python {v.major}.{v.minor} (QA chỉ cần ≥ 3.8, bản nào cũng được)", "cài Python từ python.org")
+    report(shutil.which("git") is not None, "git có sẵn", "cài Git (git-scm.com)")
+    try:
+        remote = repo_slug()
+        report(True, f"repo GitHub: {remote}")
+    except (subprocess.CalledProcessError, SystemExit):
+        report(False, "remote origin trỏ GitHub", "chạy trong thư mục đã git clone")
+    free = shutil.disk_usage(ROOT).free / 2**30
+    report(free >= 1, f"đĩa trống {free:.0f} GB (sách ~0,3 GB)", "dọn đĩa")
+    have_book = BOOK_DIR.joinpath("package.opf").exists() and QA_HTML.exists()
+    print(f"[{'OK' if have_book else '..'}] sách trong out/: {'đã có' if have_book else 'chưa có, sẽ tải từ release'}")
+    with socket.socket() as sock:
+        busy = sock.connect_ex(("127.0.0.1", PORT)) == 0
+    report(not busy, f"cổng {PORT} trống", "trang QA đang chạy ở terminal khác? dùng tab đã mở hoặc Ctrl+C bên đó")
+    if fails:
+        sys.exit("Có lỗi phải sửa trước.")
 
 
 # ---------- tải sách từ GitHub Release ----------
@@ -93,7 +123,7 @@ class Handler(SimpleHTTPRequestHandler):
 def serve():
     server = ThreadingHTTPServer(("127.0.0.1", PORT), partial(Handler, directory=str(OUT)))
     url = f"http://localhost:{PORT}/qa.html"
-    print(f"Trang QA: {url}\nCtrl+C để dừng. CSV xuất từ trang sẽ ghi vào qa/; xong thì: python3 scripts/qa.py submit")
+    print(f"Trang QA: {url}\nCtrl+C để dừng. CSV xuất từ trang sẽ ghi vào qa/; xong thì: make submit-qa")
     webbrowser.open(url)
     try:
         server.serve_forever()
@@ -114,7 +144,7 @@ def submit():
     git("commit", "-m", f"qa: ghi nhận lỗi {names}")
     git("pull", "--rebase", "-q")
     git("push")
-    print(f"Đã push {len(new)} file. Người giữ repo: make merge-qa → điền speech → make fix")
+    print(f"Đã push {len(new)} file. Cảm ơn! (Người giữ repo: make merge-qa → điền speech → make fix)")
 
 
 if __name__ == "__main__":
@@ -123,6 +153,9 @@ if __name__ == "__main__":
         submit()
     elif cmd == "fetch":
         fetch(force="--force" in sys.argv)
+    elif cmd == "check":
+        check()
     else:
+        check()
         fetch()
         serve()

@@ -6,15 +6,21 @@ Chuyển PDF có text sang sách nói DAISY 3 (văn bản + audio đồng bộ *
 
 ## Đồng đội: QA trong 3 lệnh (không cần cài model, không cần venv)
 
-Cần **Git** và **Python 3** bất kỳ (macOS có sẵn; Windows: [python.org](https://www.python.org/downloads/), tick *Add to PATH*).
+Cần **Git**, **Python 3** (bản nào cũng được) và **make**:
+
+| | Cài một lần |
+|---|---|
+| macOS | `xcode-select --install` (có sẵn git, python3, make) |
+| Windows | cài [Git for Windows](https://git-scm.com/download/win) (kèm **Git Bash**), [Python](https://www.python.org/downloads/) (tick *Add to PATH*), rồi trong PowerShell: `winget install ezwinports.make`. Mọi lệnh bên dưới gõ trong **Git Bash** |
+| Ubuntu | `sudo apt install git python3 make` |
 
 ```bash
 git clone https://github.com/ThanhDuonghcmut/master-class-voice-processing.git && cd master-class-voice-processing
-python3 scripts/qa.py          # lần đầu: tự tải sách từ GitHub Release (~290 MB) → mở http://localhost:8765/qa.html
-python3 scripts/qa.py submit   # nghe xong, đã bấm Xuất CSV → commit + push lên repo
+make qa          # kiểm máy → lần đầu tự tải sách từ GitHub Release (~290 MB) → mở http://localhost:8765/qa.html
+make submit-qa   # nghe xong, đã bấm Xuất CSV → commit + push lên repo
 ```
 
-Windows dùng `py -3 scripts\qa.py` (hoặc `python`). macOS/Linux có thể gõ `make qa` / `make submit-qa` — cùng lệnh.
+`make qa` tự kiểm git / Python / đĩa / cổng và in `[OK]`/`[FAIL]` kèm cách sửa; `make help` liệt kê mọi lệnh. Không cài được make thì chạy thẳng `python3 scripts/qa.py` và `python3 scripts/qa.py submit` (Windows: `py -3`).
 
 **Chia 3 phần cân thời lượng** (hiện sẵn trong mục lục trái của trang QA):
 
@@ -37,7 +43,7 @@ Windows dùng `py -3 scripts\qa.py` (hoặc `python`). macOS/Linux có thể gõ
 
 Ghi chú nói **lỗi gì, ở từ nào**: "nghỉ sai sau *giáo*", "đọc *4,444* thành bốn nghìn", "tên *Garrone* đọc lạ". Xuất nhiều lần cũng được — mỗi lần một file, người gộp sẽ hợp nhất.
 
-Có bản sách mới (release mới): `python3 scripts/qa.py fetch --force`.
+Có bản sách mới (release mới): `make fetch`.
 
 ## Người giữ repo: gộp QA và sửa cách đọc
 
@@ -66,40 +72,19 @@ Cần ≥ 8 GB RAM, ≥ 10 GB đĩa trống, mạng cho lần tải model đầu
 | Python khác (3.9, 3.14…) | cài [uv](https://docs.astral.sh/uv/) qua pip, uv **tự tải Python 3.12** và tạo `.venv` |
 | Đã có uv | dùng uv luôn, không cần Python đúng bản |
 
-Cuối cùng nó chạy `00_check_env.py` và in bảng `[OK]/[WARN]/[FAIL]`.
+Cuối cùng `make setup` chạy `00_check_env.py` và in bảng `[OK]/[WARN]/[FAIL]`.
 
-### macOS / Linux
+Cùng bộ Git / Python / make như mục QA (Windows: gõ trong Git Bash).
 
 ```bash
-# Chưa có git/python: xcode-select --install (macOS)   |   sudo apt install git python3 python3-venv (Ubuntu)
-git clone https://github.com/ThanhDuonghcmut/master-class-voice-processing.git && cd master-class-voice-processing
-python3 scripts/setup.py                 # hoặc: make setup
-make check-tts                           # tải model, đọc thử 1 câu → RTF + ước lượng thời gian
-make trial                               # ~3 phút: 1 truyện + chú thích → out/Nhung_tam_long_cao_ca/
-make all                                 # cả sách: ~70 phút trên Apple M5 Pro (RTF 0,12)
+make setup        # tạo .venv + cài thư viện; Python không phải 3.10–3.13 thì tự cài uv và tải 3.12
+make check-tts    # kiểm máy, tải model (~1 GB, một lần), đọc thử 1 câu → RTF + ước lượng thời gian cả sách
+make trial        # ~3 phút: vài truyện → out/Nhung_tam_long_cao_ca/ + trang QA
+make all          # cả sách: ~70 phút trên Apple M5 Pro (RTF 0,12); x86 chậm hơn ~4×
+make thorium      # nén sách thành zip và mở bằng Thorium Reader (brew install --cask thorium)
 ```
 
-Nghe thử: `brew install --cask thorium`, nén thư mục sách (`cd out && zip -0 -r sach.zip Nhung_tam_long_cao_ca`) rồi Import **file zip** vào Thorium Reader — import thẳng `package.opf` Thorium sẽ không nhận audio mà đọc bằng TTS hệ thống.
-
-### Windows (PowerShell)
-
-Cài [Git](https://git-scm.com/download/win) và Python từ [python.org](https://www.python.org/downloads/) (tick **Add python.exe to PATH**; bản nào cũng được, `setup.py` sẽ tự lo Python 3.12 nếu cần). Windows không có `make`, chạy thẳng script:
-
-```powershell
-git clone https://github.com/ThanhDuonghcmut/master-class-voice-processing.git; cd master-class-voice-processing
-py -3 scripts\setup.py                   # hoặc: python scripts\setup.py
-$py = ".venv\Scripts\python.exe"
-& $py scripts\00_check_env.py --tts      # kiểm máy + đọc thử
-& $py scripts\01_extract_pdf.py          # bước 1
-& $py scripts\02_tts.py front lv1-02 lv2-001 notes   # bước 2, dựng thử vài nhóm (~3 phút)
-& $py scripts\03_concat_mp3.py           # bước 3
-& $py scripts\04_build_daisy.py          # bước 4 → out\Nhung_tam_long_cao_ca\
-& $py scripts\02_tts.py                  # cả sách (~70 phút M-series; x86 chậm hơn ~4×), rồi chạy lại bước 3-4
-```
-
-Nghe thử: cài [Thorium Reader](https://thorium.edrlab.org) (Microsoft Store) hoặc Dolphin EasyReader → nén thư mục `out\Nhung_tam_long_cao_ca` thành zip rồi Import **file zip** (không import `package.opf` lẻ).
-
-Nếu PowerShell chặn script (`irm ... | iex`): `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`. Nếu `py` không có: dùng `python`.
+Thorium chỉ nhận DAISY qua **zip/thư mục**; import thẳng `package.opf` nó không thấy audio và đọc bằng TTS hệ thống.
 
 ### Chạy dở dang
 
@@ -130,7 +115,7 @@ flowchart LR
 | 3 | `mp3` | `build/mp3/<nhóm>.mp3` + `timing.json` (clipBegin/End tính từ số mẫu PCM) | đổi khoảng nghỉ (`PAUSE_AFTER` trong `book_units.py`) |
 | 4 | `daisy` | `out/<slug>/` (chỉ gồm nhóm đã có audio, nên dựng thử vẫn mở được) + `out/qa.html` | luôn rẻ (giây) |
 | 5 | `package` | zip + sha256 | trước khi nộp |
-| QA | `qa` · `submit-qa` · `merge-qa` · `fix` · `release` | trang nghe-ghi nhận; nộp CSV; gộp CSV; đọc lại câu đã sửa; đưa lên Release | mỗi vòng QA |
+| QA | `qa` · `qa-check` · `submit-qa` · `fetch` · `merge-qa` · `fix` · `release` | trang nghe-ghi nhận; nộp CSV; gộp CSV; đọc lại câu đã sửa; đưa lên Release | mỗi vòng QA |
 
 **Nhóm** = 1 file mp3 = 1 file smil: `front` (tên sách, tác giả) · `lv1-NN` (tiêu đề tháng, riêng `lv1-01` MỞ ĐẦU có nội dung) · `lv2-NNN` (88 truyện). 92 chú thích đọc **ngay sau đoạn** chứa `[n]`, mở đầu bằng "Chú thích:", đánh dấu skippable (Thorium: tắt/bật trong cài đặt đọc). Xem id trong `build/book.json`.
 
