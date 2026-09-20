@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA sách nói — __TITLE__</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#222; --muted:#777; --line:#e3e1da; --hl:#fff3b0; --err:#ffe1e1; --acc:#2b6cb0; }
+  * { box-sizing:border-box }
+  body { margin:0; font:15px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--fg); background:var(--bg); display:flex; height:100vh }
+  nav { width:290px; overflow:auto; border-right:1px solid var(--line); padding:12px; background:#fff }
+  nav h1 { font-size:15px; margin:0 0 10px }
+  nav .lv1 { font-weight:600; margin-top:10px; font-size:13px; color:var(--muted); text-transform:uppercase }
+  nav a { display:block; padding:3px 6px; color:var(--fg); text-decoration:none; border-radius:4px; font-size:14px }
+  nav a:hover { background:#f0eee8 } nav a.on { background:#e2ecf8; color:var(--acc) }
+  nav a .n { color:var(--muted); font-size:12px; float:right }
+  main { flex:1; overflow:auto; padding:16px 28px 80px }
+  header { position:sticky; top:0; background:var(--bg); padding:8px 0 10px; border-bottom:1px solid var(--line); margin-bottom:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+  header h2 { font-size:18px; margin:0; flex:1 }
+  button { font:inherit; font-size:13px; padding:5px 10px; border:1px solid #bbb; background:#fff; border-radius:5px; cursor:pointer }
+  button:hover { background:#f2f2f2 } button.primary { background:var(--acc); color:#fff; border-color:var(--acc) }
+  .stat { font-size:13px; color:var(--muted) }
+  .para { margin:0 0 14px; padding-left:8px; border-left:3px solid transparent }
+  .para.note { border-left-color:#c9c3b3; background:#f4f2ea; padding:6px 10px; border-radius:4px; font-size:14px }
+  .sent { display:flex; gap:8px; padding:3px 6px; border-radius:4px; align-items:flex-start }
+  .sent:hover { background:#f0eee8 }
+  .sent.playing { background:var(--hl) }
+  .sent.err { background:var(--err) }
+  .sent .id { font:12px ui-monospace, Menlo, monospace; color:var(--muted); white-space:nowrap; padding-top:3px; cursor:pointer; min-width:120px }
+  .sent .id:hover { color:var(--acc) }
+  .sent .txt { flex:1; cursor:pointer }
+  .sent .txt.h { font-weight:600 } .sent .txt.dateline { font-style:italic }
+  .sent input[type=checkbox] { margin-top:5px }
+  .sent textarea { display:none; width:260px; min-height:28px; font:13px inherit; padding:3px 5px; border:1px solid #ccc; border-radius:4px; resize:vertical }
+  .sent.err textarea { display:block }
+  footer { position:fixed; bottom:0; left:290px; right:0; background:#fff; border-top:1px solid var(--line); padding:8px 28px; display:flex; gap:12px; align-items:center; font-size:13px }
+  footer audio { flex:1; height:32px }
+  kbd { font:12px ui-monospace, monospace; background:#eee; padding:1px 5px; border-radius:3px; border:1px solid #ccc }
+</style>
+</head>
+<body>
+<nav id="nav"><h1>__TITLE__</h1></nav>
+<main>
+  <header>
+    <h2 id="title"></h2>
+    <span class="stat" id="stat"></span>
+    <button id="playAll">▶ Nghe cả truyện</button>
+    <button id="export" class="primary">⬇ Xuất CSV lỗi</button>
+    <button id="clear">Xoá ghi nhận</button>
+  </header>
+  <div id="body"></div>
+</main>
+<footer>
+  <audio id="audio" controls preload="none"></audio>
+  <span>Bấm vào câu để nghe · <kbd>Space</kbd> dừng/tiếp · <kbd>↓</kbd> câu kế · tick ☐ rồi ghi chú → ghi nhận lưu trong trình duyệt này</span>
+</footer>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const KEY = 'qa:' + DATA.slug;
+const audio = document.getElementById('audio');
+let notes = {}; try { notes = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+let cur = null, clips = [], clipIdx = -1, continuous = false;
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} }
+function fmt(s) { return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') + '.' + Math.floor((s % 1) * 10); }
+
+// ---------- mục lục ----------
+const nav = document.getElementById('nav');
+for (const lv of DATA.levels) {
+  const h = document.createElement('div'); h.className = 'lv1'; h.textContent = lv.title; nav.appendChild(h);
+  for (const g of lv.groups) {
+    const a = document.createElement('a'); a.href = '#' + g.id; a.dataset.g = g.id;
+    a.innerHTML = `${g.title}<span class="n">${g.n} câu</span>`;
+    a.onclick = (e) => { e.preventDefault(); show(g.id); };
+    nav.appendChild(a);
+  }
+}
+const GROUPS = Object.fromEntries(DATA.levels.flatMap(l => l.groups).map(g => [g.id, g]));
+
+// ---------- hiển thị một truyện ----------
+function show(gid) {
+  cur = GROUPS[gid]; clips = cur.clips; clipIdx = -1; continuous = false;
+  audio.pause(); audio.src = cur.mp3; location.hash = gid;
+  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.g === gid));
+  document.getElementById('title').textContent = cur.title;
+  document.getElementById('stat').textContent = `${cur.mp3} · ${fmt(cur.duration)} · ${cur.n} câu`;
+  const body = document.getElementById('body'); body.innerHTML = '';
+  let para = null, lastP = null;
+  clips.forEach((c, i) => {
+    if (c.p !== lastP) { para = document.createElement('div'); para.className = 'para' + (c.kind.startsWith('note') ? ' note' : ''); body.appendChild(para); lastP = c.p; }
+    const row = document.createElement('div'); row.className = 'sent'; row.id = 'row-' + c.id; row.dataset.i = i;
+    const n = notes[c.id];
+    if (n) row.classList.add('err');
+    row.innerHTML = `<span class="id" title="Nghe câu này">${c.id} · ${fmt(c.b)}</span>
+      <span class="txt ${c.kind === 'h1' || c.kind === 'h2' ? 'h' : c.kind}">${esc(c.text)}</span>
+      <input type="checkbox" title="Đánh dấu lỗi" ${n ? 'checked' : ''}>
+      <textarea placeholder="Lỗi gì? (nghỉ sai sau từ…, đọc số sai, giọng lạ…)">${n ? esc(n.note) : ''}</textarea>`;
+    row.querySelector('.id').onclick = row.querySelector('.txt').onclick = () => play(i, false);
+    row.querySelector('input').onchange = (e) => {
+      if (e.target.checked) { notes[c.id] = notes[c.id] || { note: '' }; row.classList.add('err'); row.querySelector('textarea').focus(); }
+      else { delete notes[c.id]; row.classList.remove('err'); }
+      save();
+    };
+    row.querySelector('textarea').oninput = (e) => { notes[c.id] = { note: e.target.value }; save(); };
+    para.appendChild(row);
+  });
+}
+
+// ---------- phát ----------
+function highlight(i) {
+  clipIdx = i;
+  document.querySelectorAll('.sent.playing').forEach(r => r.classList.remove('playing'));
+  const row = document.getElementById('row-' + clips[i].id); row.classList.add('playing');
+  row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function play(i, cont) {            // seek chỉ khi người dùng chọn câu
+  continuous = cont; highlight(i);
+  audio.currentTime = clips[i].b; audio.play();
+}
+audio.ontimeupdate = () => {        // bắn mỗi ~0,25 s → khi nghe liên tục KHÔNG seek, chỉ đổi bôi sáng (seek lùi gây lặp đầu câu)
+  if (clipIdx < 0) return;
+  const t = audio.currentTime;
+  if (t < clips[clipIdx].e - 0.02) return;
+  if (continuous) {
+    let j = clipIdx;
+    while (j + 1 < clips.length && t >= clips[j].e - 0.02) j++;
+    if (j !== clipIdx) highlight(j);
+    if (j === clips.length - 1 && t >= clips[j].e) audio.pause();
+  } else {
+    audio.pause();
+  }
+};
+document.getElementById('playAll').onclick = () => play(0, true);
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); audio.paused ? audio.play() : audio.pause(); }
+  if (e.code === 'ArrowDown' && clipIdx + 1 < clips.length) { e.preventDefault(); play(clipIdx + 1, continuous); }
+  if (e.code === 'ArrowUp' && clipIdx > 0) { e.preventDefault(); play(clipIdx - 1, continuous); }
+});
+
+// ---------- xuất / xoá ----------
+document.getElementById('export').onclick = () => {
+  const rows = [['id', 'nhom', 'truyen', 'cau', 'ghi_chu']];
+  for (const lv of DATA.levels) for (const g of lv.groups) for (const c of g.clips)
+    if (notes[c.id]) rows.push([c.id, g.id, g.title, c.text, notes[c.id].note || '']);
+  if (rows.length === 1) { alert('Chưa ghi nhận lỗi nào.'); return; }
+  const csv = '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `qa_${DATA.slug}_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+};
+document.getElementById('clear').onclick = () => { if (confirm('Xoá toàn bộ ghi nhận lỗi trong trình duyệt này?')) { notes = {}; save(); show(cur.id); } };
+function esc(s) { return s.replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
+
+show((location.hash.slice(1) in GROUPS) ? location.hash.slice(1) : DATA.levels[0].groups[0].id);
+</script>
+</body>
+</html>

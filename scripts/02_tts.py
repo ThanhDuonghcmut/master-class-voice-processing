@@ -33,10 +33,23 @@ SAMPLE_RATE = 48_000
 SLOW_SEC_PER_CHAR = 0.15
 
 
+def up_to_date(u):
+    """wav đã có VÀ bản đọc lúc sinh (file .txt cạnh wav) trùng bản đọc hiện tại.
+    wav cũ chưa có .txt thì coi là trùng và ghi .txt luôn (chỉ xảy ra một lần khi nâng cấp)."""
+    wav = WAV_DIR / u.group / f"{u.id}.wav"
+    if not wav.exists():
+        return False
+    txt = wav.with_suffix(".txt")
+    if not txt.exists():
+        txt.write_text(u.text, encoding="utf-8")
+        return True
+    return txt.read_text(encoding="utf-8") == u.text
+
+
 def main(only):
     book = load_book()
     todo = [(u.group, u.id, u.text) for u in iter_units(book)
-            if (not only or u.group in only) and not (WAV_DIR / u.group / f"{u.id}.wav").exists()]
+            if (not only or u.group in only) and not up_to_date(u)]
     total = sum(1 for _ in iter_units(book))
     print(f"Đơn vị đọc: {total} tổng, {len(todo)} cần sinh, giọng {VOICE}")
     if not todo:
@@ -51,6 +64,7 @@ def main(only):
             out = WAV_DIR / group / f"{uid}.wav"
             out.parent.mkdir(parents=True, exist_ok=True)
             sf.write(out, np.asarray(audio, dtype=np.float32), SAMPLE_RATE, subtype="PCM_16")
+            out.with_suffix(".txt").write_text(text, encoding="utf-8")
             rec = {"group": group, "id": uid, "chars": len(text), "sec": round(dur, 3),
                    "compute": round(time.time() - t0, 3)}
             if len(text) >= 20 and dur / len(text) > SLOW_SEC_PER_CHAR:   # text ngắn luôn "chậm" giả
