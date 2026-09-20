@@ -16,6 +16,7 @@ Trong trang QA:
 
 | Thao tác | Kết quả |
 |---|---|
+| `make qa` | dựng lại sách nếu cần, chạy server, mở `http://localhost:8765/qa.html` |
 | Bấm truyện ở mục lục trái | hiện toàn bộ câu của truyện, mỗi dòng `id · mốc giây · câu` |
 | Bấm vào câu / `↓` `↑` | phát đúng câu đó |
 | **▶ Nghe cả truyện**, `Space` | nghe liền, câu đang đọc bôi sáng |
@@ -24,12 +25,13 @@ Trong trang QA:
 
 Ghi chú nên nói **lỗi gì và ở từ nào**: "nghỉ sai sau *giáo*", "đọc *4,444* thành bốn nghìn", "tên *Garrone* đọc lạ". Điền **tên người nghe** ở ô trên cùng trước khi xuất — tên vào file CSV để không đè nhau.
 
-Nộp CSV, chọn một trong hai:
+**⬇ Xuất CSV** khi mở qua `make qa` sẽ ghi thẳng `qa/qa_<tên>_<ngày>_<giờ>.csv` vào repo (trang chạy qua server cục bộ — trình duyệt không cho trang `file://` ghi file). Rồi:
 
 ```bash
-make submit-qa CSV=~/Downloads/qa_Duong_2026-09-20.csv   # có repo: chép vào qa/, commit, push — xong
+make submit-qa        # commit + push mọi CSV mới trong qa/
 ```
-hoặc gửi file cho người giữ repo (Zalo/mail), người đó bỏ vào `qa/`.
+
+Mở `qa.html` từ bản release (không có repo) thì nút Xuất chỉ tải xuống được → gửi file cho người giữ repo bỏ vào `qa/`.
 
 **Người giữ repo:**
 

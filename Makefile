@@ -14,13 +14,13 @@ help: ## Liệt kê lệnh
 
 # ---------- QA: nghe, ghi nhận, sửa cách đọc ----------
 
-qa: daisy ## Mở trang QA (out/qa.html): nghe từng câu kèm id, tick lỗi, xuất CSV
-	$(OPEN) out/qa.html
+qa: daisy ## Mở trang QA qua server cục bộ: nghe từng câu kèm id, tick lỗi; Xuất CSV ghi thẳng vào qa/
+	$(PY) scripts/qa_server.py
 
-submit-qa: ## Nộp CSV vừa xuất vào repo: make submit-qa CSV=~/Downloads/qa_Ten_2026-09-20.csv (chép vào qa/, commit, push)
-	@test -n "$(CSV)" || { echo "Thiếu CSV=đường/dẫn/file.csv"; exit 1; }
-	cp "$(CSV)" qa/ && git add "qa/$$(basename "$(CSV)")" && git commit -m "qa: ghi nhận lỗi $$(basename "$(CSV)" .csv)" && git pull --rebase -q && git push
-	@echo "→ người giữ repo chạy: make merge-qa && (điền speech) && make fix"
+submit-qa: ## Commit + push mọi CSV mới trong qa/
+	@git add qa/*.csv && git diff --cached --quiet && { echo "qa/ không có CSV mới"; exit 0; } || true
+	git commit -m "qa: ghi nhận lỗi $$(git diff --cached --name-only | xargs -n1 basename | sed 's/\.csv$$//' | paste -sd, -)" && git pull --rebase -q && git push
+	@echo "→ người giữ repo: make merge-qa, điền cột speech, make fix"
 
 merge-qa: ## Gộp CSV đồng đội (QA_CSV=qa/*.csv) vào sua_cach_doc.csv, rồi điền tay cột speech
 	$(PY) scripts/gop_qa.py $(QA_CSV)
