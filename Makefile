@@ -14,13 +14,14 @@ help: ## Liệt kê lệnh
 
 # ---------- QA: nghe, ghi nhận, sửa cách đọc ----------
 
-qa: daisy ## Mở trang QA qua server cục bộ: nghe từng câu kèm id, tick lỗi; Xuất CSV ghi thẳng vào qa/
-	$(PY) scripts/qa_server.py
+qa: ## Mở trang QA (không cần .venv): thiếu sách thì tải từ GitHub Release; Xuất CSV ghi thẳng vào qa/
+	python3 scripts/qa.py
 
 submit-qa: ## Commit + push mọi CSV mới trong qa/
-	@git add qa/*.csv && git diff --cached --quiet && { echo "qa/ không có CSV mới"; exit 0; } || true
-	git commit -m "qa: ghi nhận lỗi $$(git diff --cached --name-only | xargs -n1 basename | sed 's/\.csv$$//' | paste -sd, -)" && git pull --rebase -q && git push
-	@echo "→ người giữ repo: make merge-qa, điền cột speech, make fix"
+	python3 scripts/qa.py submit
+
+fetch: ## Tải lại sách + qa.html từ release mới nhất (khi có bản mới)
+	python3 scripts/qa.py fetch --force
 
 merge-qa: ## Gộp CSV đồng đội (QA_CSV=qa/*.csv) vào sua_cach_doc.csv, rồi điền tay cột speech
 	$(PY) scripts/gop_qa.py $(QA_CSV)
@@ -54,6 +55,12 @@ mp3: ## Bước 3: ghép wav → mp3 + timing.json (nhóm nào đủ wav mới g
 daisy: ## Bước 4: sinh dtbook/smil/ncx/opf/css → out/<slug>/ + out/qa.html
 	$(PY) scripts/04_build_daisy.py
 
+release: ## Đưa sách lên GitHub Release cho đồng đội QA: make release TAG=v0.2-qa
+	@test -n "$(TAG)" || { echo "Thiếu TAG=vX.Y-qa"; exit 1; }
+	@slug=$$($(PY) -c 'import json;print(json.load(open("metadata.json"))["slug"])'); \
+	  rm -f out/$$slug.zip && (cd out/$$slug && zip -q -0 ../$$slug.zip *) && \
+	  gh release create $(TAG) out/$$slug.zip out/qa.html --title "$(TAG)" --notes "Sách DAISY + trang QA. Đồng đội: make qa (tự tải)." && rm out/$$slug.zip
+
 package: ## Bước 5: bản nộp — kiểm metadata đủ, zip + sha256 vào out/<MSHV>/
 	$(PY) scripts/04_build_daisy.py --strict
 	$(PY) scripts/05_package.py
@@ -85,4 +92,4 @@ clean-mp3: ## Xoá mp3 + timing (giữ wav — sinh lại bằng make mp3, vài 
 clean-all: ## Xoá toàn bộ build/ và out/ — CẢ WAV (70 phút TTS)
 	rm -rf build out
 
-.PHONY: help qa submit-qa merge-qa fix setup check check-tts extract tts tts-groups mp3 daisy package trial all thorium voices validate clean-out clean-mp3 clean-all
+.PHONY: help qa submit-qa fetch merge-qa fix release setup check check-tts extract tts tts-groups mp3 daisy package trial all thorium voices validate clean-out clean-mp3 clean-all

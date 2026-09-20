@@ -285,11 +285,32 @@ class Daisy:
                   for g in groups if g in self.timing]
             if gs:
                 levels.append({"title": lv["speech"], "groups": gs})
-        data = {"slug": self.meta["slug"], "levels": levels}
+        parts = self.qa_parts(levels)
+        data = {"slug": self.meta["slug"], "levels": levels, "parts": parts}
         html = (ROOT / "scripts" / "qa_template.html").read_text(encoding="utf-8")
         html = html.replace("__TITLE__", escape(self.meta["title"])).replace(
             "__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))
         (self.out.parent / "qa.html").write_text(html, encoding="utf-8")
+
+    QA_PARTS = 3   # chia người nghe: mỗi phần ~1/3 thời lượng, cắt ở ranh giới truyện
+
+    def qa_parts(self, levels):
+        """Gán g["part"] = 1..N theo thứ tự đọc; trả [{"n", "duration", "first", "last"}]."""
+        groups = [g for lv in levels for g in lv["groups"]]
+        total = sum(g["duration"] for g in groups)
+        parts, acc = [], 0.0
+        for g in groups:
+            n = len(parts) or 1
+            if len(parts) < self.QA_PARTS and acc + g["duration"] / 2 > total / self.QA_PARTS * len(parts) \
+                    and not g["id"].startswith("front"):
+                parts.append({"n": len(parts) + 1, "duration": 0.0, "first": g["title"], "last": g["title"]})
+            if not parts:
+                parts.append({"n": 1, "duration": 0.0, "first": g["title"], "last": g["title"]})
+            g["part"] = parts[-1]["n"]
+            parts[-1]["duration"] += g["duration"]
+            parts[-1]["last"] = g["title"]
+            acc += g["duration"]
+        return parts
 
     def qa_group(self, g, title):
         t = self.timing[g]

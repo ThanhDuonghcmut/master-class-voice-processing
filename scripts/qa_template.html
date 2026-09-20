@@ -11,6 +11,8 @@
   nav { width:290px; overflow:auto; border-right:1px solid var(--line); padding:12px; background:#fff }
   nav h1 { font-size:15px; margin:0 0 10px }
   nav .lv1 { font-weight:600; margin-top:10px; font-size:13px; color:var(--muted); text-transform:uppercase }
+  nav .part { margin:16px -12px 6px; padding:6px 12px; background:#eef3fa; color:var(--acc); font-weight:700; font-size:13px; border-top:1px solid #d5e2f2; border-bottom:1px solid #d5e2f2 }
+  nav .part small { font-weight:400; color:var(--muted) }
   nav a { display:block; padding:3px 6px; color:var(--fg); text-decoration:none; border-radius:4px; font-size:14px }
   nav a:hover { background:#f0eee8 } nav a.on { background:#e2ecf8; color:var(--acc) }
   nav a .n { color:var(--muted); font-size:12px; float:right }
@@ -71,9 +73,17 @@ function fmt(s) { return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).p
 
 // ---------- mục lục ----------
 const nav = document.getElementById('nav');
+let curPart = 0;
 for (const lv of DATA.levels) {
   const h = document.createElement('div'); h.className = 'lv1'; h.textContent = lv.title; nav.appendChild(h);
   for (const g of lv.groups) {
+    if (g.part && g.part !== curPart) {           // đầu mỗi phần chia cho người nghe
+      curPart = g.part; const P = DATA.parts[curPart - 1];
+      const d = document.createElement('div'); d.className = 'part';
+      d.innerHTML = `Phần ${P.n} <small>· ${Math.floor(P.duration / 3600)}h${String(Math.floor(P.duration % 3600 / 60)).padStart(2, '0')} · ${esc(P.first)} → ${esc(P.last)}</small>`;
+      nav.appendChild(d);
+      if (lv.groups[0] !== g) { const h2 = document.createElement('div'); h2.className = 'lv1'; h2.textContent = lv.title + ' (tiếp)'; nav.appendChild(h2); }
+    }
     const a = document.createElement('a'); a.href = '#' + g.id; a.dataset.g = g.id;
     a.innerHTML = `${g.title}<span class="n">${g.n} câu</span>`;
     a.onclick = (e) => { e.preventDefault(); show(g.id); };
@@ -88,7 +98,7 @@ function show(gid) {
   audio.pause(); audio.src = cur.mp3; location.hash = gid;
   document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.g === gid));
   document.getElementById('title').textContent = cur.title;
-  document.getElementById('stat').textContent = `${cur.mp3} · ${fmt(cur.duration)} · ${cur.n} câu`;
+  document.getElementById('stat').textContent = `Phần ${cur.part} · ${cur.mp3} · ${fmt(cur.duration)} · ${cur.n} câu`;
   const body = document.getElementById('body'); body.innerHTML = '';
   let para = null, lastP = null;
   clips.forEach((c, i) => {
