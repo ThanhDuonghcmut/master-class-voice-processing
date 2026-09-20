@@ -22,7 +22,14 @@ Trong trang QA:
 | Tick ☐ cạnh câu, gõ ghi chú | ghi nhận lỗi (lưu trong trình duyệt, đóng tab không mất) |
 | **⬇ Xuất CSV lỗi** | tải `qa_<slug>_<ngày>.csv` gồm `id, nhóm, truyện, câu, ghi_chu` |
 
-Ghi chú nên nói **lỗi gì và ở từ nào**: "nghỉ sai sau *giáo*", "đọc *4,444* thành bốn nghìn", "tên *Garrone* đọc lạ". Gửi CSV cho người giữ repo (hoặc commit vào `qa/`).
+Ghi chú nên nói **lỗi gì và ở từ nào**: "nghỉ sai sau *giáo*", "đọc *4,444* thành bốn nghìn", "tên *Garrone* đọc lạ". Điền **tên người nghe** ở ô trên cùng trước khi xuất — tên vào file CSV để không đè nhau.
+
+Nộp CSV, chọn một trong hai:
+
+```bash
+make submit-qa CSV=~/Downloads/qa_Duong_2026-09-20.csv   # có repo: chép vào qa/, commit, push — xong
+```
+hoặc gửi file cho người giữ repo (Zalo/mail), người đó bỏ vào `qa/`.
 
 **Người giữ repo:**
 

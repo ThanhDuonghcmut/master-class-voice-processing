@@ -17,6 +17,11 @@ help: ## Liệt kê lệnh
 qa: daisy ## Mở trang QA (out/qa.html): nghe từng câu kèm id, tick lỗi, xuất CSV
 	$(OPEN) out/qa.html
 
+submit-qa: ## Nộp CSV vừa xuất vào repo: make submit-qa CSV=~/Downloads/qa_Ten_2026-09-20.csv (chép vào qa/, commit, push)
+	@test -n "$(CSV)" || { echo "Thiếu CSV=đường/dẫn/file.csv"; exit 1; }
+	cp "$(CSV)" qa/ && git add "qa/$$(basename "$(CSV)")" && git commit -m "qa: ghi nhận lỗi $$(basename "$(CSV)" .csv)" && git pull --rebase -q && git push
+	@echo "→ người giữ repo chạy: make merge-qa && (điền speech) && make fix"
+
 merge-qa: ## Gộp CSV đồng đội (QA_CSV=qa/*.csv) vào sua_cach_doc.csv, rồi điền tay cột speech
 	$(PY) scripts/gop_qa.py $(QA_CSV)
 
@@ -80,4 +85,4 @@ clean-mp3: ## Xoá mp3 + timing (giữ wav — sinh lại bằng make mp3, vài 
 clean-all: ## Xoá toàn bộ build/ và out/ — CẢ WAV (70 phút TTS)
 	rm -rf build out
 
-.PHONY: help qa merge-qa fix setup check check-tts extract tts tts-groups mp3 daisy package trial all thorium voices validate clean-out clean-mp3 clean-all
+.PHONY: help qa submit-qa merge-qa fix setup check check-tts extract tts tts-groups mp3 daisy package trial all thorium voices validate clean-out clean-mp3 clean-all

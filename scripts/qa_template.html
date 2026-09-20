@@ -44,6 +44,7 @@
   <header>
     <h2 id="title"></h2>
     <span class="stat" id="stat"></span>
+    <input id="who" placeholder="Tên người nghe" title="Vào tên file CSV và cột nguoi" style="font:inherit;font-size:13px;padding:4px 8px;border:1px solid #bbb;border-radius:5px;width:140px">
     <button id="playAll">▶ Nghe cả truyện</button>
     <button id="export" class="primary">⬇ Xuất CSV lỗi</button>
     <button id="clear">Xoá ghi nhận</button>
@@ -52,7 +53,7 @@
 </main>
 <footer>
   <audio id="audio" controls preload="none"></audio>
-  <span>Bấm vào câu để nghe · <kbd>Space</kbd> dừng/tiếp · <kbd>↓</kbd> câu kế · tick ☐ rồi ghi chú → ghi nhận lưu trong trình duyệt này</span>
+  <span>Bấm vào câu để nghe · <kbd>Space</kbd> dừng/tiếp · <kbd>↓</kbd> câu kế · tick ☐ rồi ghi chú (lưu trong trình duyệt) · xong thì ⬇ Xuất CSV rồi <code>make submit-qa CSV=…</code> hoặc gửi file cho người giữ repo</span>
 </footer>
 <script id="data" type="application/json">__DATA__</script>
 <script>
@@ -60,6 +61,9 @@ const DATA = JSON.parse(document.getElementById('data').textContent);
 const KEY = 'qa:' + DATA.slug;
 const audio = document.getElementById('audio');
 let notes = {}; try { notes = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const who = document.getElementById('who');
+try { who.value = localStorage.getItem('qa:who') || ''; } catch (e) {}
+who.oninput = () => { try { localStorage.setItem('qa:who', who.value); } catch (e) {} };
 let cur = null, clips = [], clipIdx = -1, continuous = false;
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} }
@@ -141,14 +145,16 @@ document.addEventListener('keydown', (e) => {
 
 // ---------- xuất / xoá ----------
 document.getElementById('export').onclick = () => {
-  const rows = [['id', 'nhom', 'truyen', 'cau', 'ghi_chu']];
+  const name = (who.value.trim() || 'khong-ten').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^A-Za-z0-9]+/g, '-');
+  const rows = [['id', 'nhom', 'truyen', 'cau', 'ghi_chu', 'nguoi']];
   for (const lv of DATA.levels) for (const g of lv.groups) for (const c of g.clips)
-    if (notes[c.id]) rows.push([c.id, g.id, g.title, c.text, notes[c.id].note || '']);
+    if (notes[c.id]) rows.push([c.id, g.id, g.title, c.text, notes[c.id].note || '', who.value.trim()]);
   if (rows.length === 1) { alert('Chưa ghi nhận lỗi nào.'); return; }
+  if (!who.value.trim() && !confirm('Chưa điền tên người nghe — xuất với tên "khong-ten"?')) return;
   const csv = '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = `qa_${DATA.slug}_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  a.download = `qa_${name}_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
 };
 document.getElementById('clear').onclick = () => { if (confirm('Xoá toàn bộ ghi nhận lỗi trong trình duyệt này?')) { notes = {}; save(); show(cur.id); } };
 function esc(s) { return s.replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
