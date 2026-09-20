@@ -19,8 +19,8 @@ from xml.sax.saxutils import escape, quoteattr
 # Console Windows mặc định không phải UTF-8 → in tiếng Việt vào file/pipe sẽ lỗi
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from book_units import (BUILD, FRONT_GROUP, NOTES_GROUP, NOTES_H1_ID, NOTES_TITLE, ROOT,
-                        groups_in_order, iter_units, load_book, load_metadata)
+from book_units import (BUILD, NOTE_LABEL, ROOT, groups_in_order, iter_units, load_book,
+                        load_metadata)
 
 MP3_DIR = BUILD / "mp3"
 GENERATOR = "daisy-pipeline-vieneu (scripts/04_build_daisy.py)"
@@ -53,6 +53,7 @@ class Daisy:
         self.units_by_group = {}
         for u in iter_units(self.book):
             self.units_by_group.setdefault(u.group, []).append(u)
+        self.notes_by_n = {n["n"]: n for n in self.book["notes"]}
         self.play_order = 0
         self.n_sync = 0        # số phần tử có smilref trong dtbook
 
@@ -73,7 +74,7 @@ class Daisy:
         parts, pos = [], 0
         for m in NOTE_MARK.finditer(raw):
             parts.append(escape(raw[pos:m.start()]))
-            parts.append(f'<noteref idref="#note{m.group(1)}" class="noteref">{m.group(1)}</noteref>')
+            parts.append(f'<noteref idref="#note{m.group(1)}" class="noteref">[{m.group(1)}]</noteref>')
             pos = m.end()
         parts.append(escape(raw[pos:]))
         return "".join(parts)
@@ -88,6 +89,7 @@ class Daisy:
     def dtbook(self):
         m = self.meta
         L = ['<?xml version="1.0" encoding="utf-8"?>',
+             '<?xml-stylesheet type="text/css" href="dtbook.css"?>',
              '<!DOCTYPE dtbook PUBLIC "-//NISO//DTD dtbook 2005-3//EN" "http://www.daisy.org/z3986/2005/dtbook-2005-3.dtd">',
              '<dtbook xmlns="http://www.daisy.org/z3986/2005/dtbook/" version="2005-3" xml:lang="vi">',
              '<head>']
@@ -104,37 +106,43 @@ class Daisy:
                 continue
             L.append(f'<level1 id="{lv["id"]}-level">')
             L.append(f'<h1 {self.sync_attrs(lv["id"])}>{self.inline(lv["title"])}</h1>')
-            L += self.paragraphs(lv["paragraphs"])
+            L += self.notes(lv["id"], lv["noterefs"])
+            L += self.paragraphs(lv["id"], lv["paragraphs"])
             for ch in lv["chapters"]:
                 if ch["id"] not in self.timing:
                     continue
                 L.append(f'<level2 id="{ch["id"]}-level">')
                 L.append(f'<h2 {self.sync_attrs(ch["id"])}>{self.inline(ch["title"])}</h2>')
+                refs = list(ch["noterefs"])
                 if ch["dateline"]:
                     d = ch["dateline"]
                     L.append(f'<dateline {self.sync_attrs(d["id"])}>{self.inline(d["raw"])}</dateline>')
-                L += self.paragraphs(ch["paragraphs"])
+                    refs += d["noterefs"]
+                L += self.notes(ch["id"], refs)
+                L += self.paragraphs(ch["id"], ch["paragraphs"])
                 L.append('</level2>')
             L.append('</level1>')
-        L.append('</bodymatter>')
-        if NOTES_GROUP in self.timing:
-            L += ['<rearmatter>', f'<level1 id="{NOTES_GROUP}-level">',
-                  f'<h1 {self.sync_attrs(NOTES_H1_ID)}>{escape(NOTES_TITLE)}</h1>']
-            for note in self.book["notes"]:
-                L.append(f'<note id="{note["id"]}" class="endnote" smilref="{NOTES_GROUP}.smil#seq_{note["id"]}">')
-                L += self.paragraphs([note])
-                L.append('</note>')
-            L += ['</level1>', '</rearmatter>']
-        L += ['</book>', '</dtbook>']
+        L += ['</bodymatter>', '</book>', '</dtbook>']
         return "\n".join(L)
 
-    def paragraphs(self, paras):
+    def sents(self, sentences):
+        return " ".join(f'<sent {self.sync_attrs(s["id"])}>{self.inline(s["raw"])}</sent>' for s in sentences)
+
+    def paragraphs(self, group, paras):
         out = []
         for p in paras:
-            sents = " ".join(f'<sent {self.sync_attrs(s["id"])}>{self.inline(s["raw"])}</sent>'
-                             for s in p["sentences"])
-            pid = f'{p["id"]}-p' if "n" in p else p["id"]   # note đã dùng id note5 cho <note>
-            out.append(f'<p id="{pid}">{sents}</p>')
+            out.append(f'<p id="{p["id"]}">{self.sents(p["sentences"])}</p>')
+            out += self.notes(group, [n for s in p["sentences"] for n in s["noterefs"]])
+        return out
+
+    def notes(self, group, refs):
+        """<note> đặt ngay sau khối chứa [n]; skippable qua seq class="note" trong SMIL."""
+        out = []
+        for n in refs:
+            note = self.notes_by_n[n]
+            label = f'<sent {self.sync_attrs(note["id"] + "-label")}>{escape(NOTE_LABEL)}</sent>'
+            out.append(f'<note id="{note["id"]}" class="footnote" smilref="{group}.smil#seq_{note["id"]}">'
+                       f'<p id="{note["id"]}-p">{label} {self.sents(note["sentences"])}</p></note>')
         return out
 
     # ---------- SMIL ----------
@@ -147,7 +155,7 @@ class Daisy:
              f'<meta name="dtb:totalElapsedTime" content="{clock(elapsed)}"/>',
              f'<meta name="dtb:generator" content={quoteattr(GENERATOR)}/>',
              '<customAttributes>',
-             '<customTest id="note" defaultState="false" override="visible"/>',
+             '<customTest id="note" defaultState="true" override="visible"/>',
              '<customTest id="noteref" defaultState="false" override="visible"/>',
              '</customAttributes>', '</head>', '<body>',
              f'<seq id="root-seq" dur="{clock(t["duration"])}">']
@@ -189,9 +197,9 @@ class Daisy:
                     for s in p["sentences"]:
                         self.paragraph_of[s["id"]] = p["id"]
         for note in self.book["notes"]:
-            for s in note["sentences"]:
-                self.paragraph_of[s["id"]] = f'{note["id"]}-p'
-                self.note_of[s["id"]] = note["id"]
+            for sid in [note["id"] + "-label", *(s["id"] for s in note["sentences"])]:
+                self.paragraph_of[sid] = f'{note["id"]}-p'
+                self.note_of[sid] = note["id"]
 
     # ---------- NCX ----------
     def nav_point(self, uid, label, cls, children=()):
@@ -214,7 +222,7 @@ class Daisy:
              '<meta name="dtb:depth" content="2"/>',
              f'<meta name="dtb:generator" content={quoteattr(GENERATOR)}/>',
              '<meta name="dtb:totalPageCount" content="0"/>', '<meta name="dtb:maxPageNumber" content="0"/>',
-             '<smilCustomTest id="note" defaultState="false" override="visible" bookStruct="NOTE"/>',
+             '<smilCustomTest id="note" defaultState="true" override="visible" bookStruct="NOTE"/>',
              '<smilCustomTest id="noteref" defaultState="false" override="visible" bookStruct="NOTE_REFERENCE"/>',
              '</head>',
              f'<docTitle><text>{escape(m["title"])}</text>{self.audio_tag("doctitle") if self.has("doctitle") else ""}</docTitle>',
@@ -226,8 +234,6 @@ class Daisy:
             children = [(ch["id"], ch["speech"], "level2")
                         for ch in lv["chapters"] if ch["id"] in self.timing]
             L += self.nav_point(lv["id"], lv["speech"], "level1", children)
-        if NOTES_GROUP in self.timing:
-            L += self.nav_point(NOTES_H1_ID, NOTES_TITLE, "level1")
         L += ['</navMap>', '</ncx>']
         return "\n".join(L)
 
@@ -255,7 +261,8 @@ class Daisy:
               '<item href="package.opf" id="opf" media-type="text/xml"/>',
               '<item href="dtbook.xml" id="dtbook" media-type="application/x-dtbook+xml"/>',
               '<item href="navigation.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>',
-              '<item href="resources.res" id="resource" media-type="application/x-dtbresource+xml"/>']
+              '<item href="resources.res" id="resource" media-type="application/x-dtbresource+xml"/>',
+              '<item href="dtbook.css" id="css" media-type="text/css"/>']
         for g in self.groups:
             L.append(f'<item href="{g}.smil" id="smil-{g}" media-type="application/smil"/>')
             L.append(f'<item href="{g}.mp3" id="mp3-{g}" media-type="audio/mpeg"/>')
@@ -263,6 +270,34 @@ class Daisy:
         L += [f'<itemref idref="smil-{g}"/>' for g in self.groups]
         L += ['</spine>', '</package>']
         return "\n".join(L)
+
+    # ---------- trang QA ----------
+    def qa_page(self):
+        """out/qa.html: nghe từng câu kèm id + mốc thời gian, ghi nhận lỗi, xuất CSV.
+        Template là code (scripts/qa_template.html); file sinh ra nhúng dữ liệu vì mở file:// không fetch được."""
+        levels, titles = [], {}
+        for lv in self.book["levels"]:
+            titles[lv["id"]] = lv["speech"]
+            groups = [lv["id"]] + [ch["id"] for ch in lv["chapters"]]
+            for ch in lv["chapters"]:
+                titles[ch["id"]] = ch["speech"]
+            gs = [self.qa_group(g, titles[g] if g != lv["id"] else "▸ " + lv["speech"])
+                  for g in groups if g in self.timing]
+            if gs:
+                levels.append({"title": lv["speech"], "groups": gs})
+        data = {"slug": self.meta["slug"], "levels": levels}
+        html = (ROOT / "scripts" / "qa_template.html").read_text(encoding="utf-8")
+        html = html.replace("__TITLE__", escape(self.meta["title"])).replace(
+            "__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))
+        (self.out.parent / "qa.html").write_text(html, encoding="utf-8")
+
+    def qa_group(self, g, title):
+        t = self.timing[g]
+        text_of = {u.id: u for u in self.units_by_group[g]}
+        clips = [{"id": cid, "b": b, "e": e, "kind": text_of[cid].kind, "text": text_of[cid].text,
+                  "p": self.paragraph_of.get(cid, cid)} for cid, b, e in t["clips"]]
+        return {"id": g, "title": title, "mp3": f'{self.out.name}/{t["mp3"]}', "duration": t["duration"],
+                "n": sum(c["kind"] in ("sent", "note_sent") for c in clips), "clips": clips}
 
     # ---------- chạy ----------
     def build(self):
@@ -281,6 +316,8 @@ class Daisy:
         (self.out / "navigation.ncx").write_text(self.ncx(), encoding="utf-8")
         (self.out / "package.opf").write_text(self.opf(elapsed), encoding="utf-8")
         shutil.copy(ROOT / "scripts" / "resources.res", self.out / "resources.res")
+        shutil.copy(ROOT / "scripts" / "dtbook.css", self.out / "dtbook.css")
+        self.qa_page()
 
         # --- kiểm chứng ---
         dt = (self.out / "dtbook.xml").read_text(encoding="utf-8")

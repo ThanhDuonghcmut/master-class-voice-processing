@@ -24,6 +24,7 @@ import pymupdf
 ROOT = Path(__file__).resolve().parents[1]
 PDF = ROOT / "input" / "nhung-tam-long-cao-ca.pdf"
 OUT = ROOT / "build" / "book.json"
+FIXES_CSV = ROOT / "sua_cach_doc.csv"   # id,speech,ghi_chu — sửa BẢN ĐỌC từng câu theo id, chữ hiển thị giữ nguyên
 
 FIRST_BODY_PAGE = 7  # trang 1-6: bìa, thông tin ebook, mục lục — không đọc
 
@@ -32,6 +33,8 @@ FIRST_BODY_PAGE = 7  # trang 1-6: bìa, thông tin ebook, mục lục — không
 SENT_END = re.compile(r'(?:(?<=[.!?…])|(?<=[.!?…][”’"\)]))\s+'
                       r'(?=[“"A-ZÀ-ỸĐ0-9]|[\-–—]\s*[“"A-ZÀ-ỸĐ0-9])')
 NOTE_MARK = re.compile(r"\[(\d+)\]")
+# Dòng ngày trong sách cụt ("Thứ ba 18"); nghe khó hiểu → bản đọc thêm "ngày": "Thứ ba, ngày 18"
+DATELINE_DAY = re.compile(r"\b([Tt]hứ (?:hai|ba|tư|năm|sáu|bảy)|[Cc]húa nhật) (\d{1,2})\b")
 MIN_SENT_CHARS = 12  # câu ngắn hơn ("Ôi!") gộp vào câu kế: TTS dễ lảm nhảm với 1-2 tiếng
 
 # Lỗi trong PDF nguồn, sửa trước khi tách câu. Mỗi dòng phải có lý do.
@@ -131,6 +134,8 @@ class Book:
         if holder["dateline"]:            # "(thư của bố)" và "Thứ năm 10" ở hai block khác nhau
             text = holder["dateline"]["raw"] + " " + text
             self.n_sent -= 1
+        # Đổi cả chữ hiển thị (không chỉ bản đọc) để chữ bôi sáng khớp tiếng; [n] vẫn giữ trong raw
+        text = DATELINE_DAY.sub(r"\1, ngày \2", text).replace("Torino[2] thứ", "Torino[2], thứ")
         holder["dateline"] = self._sentence(text)
         self.last_kind, self.carry = "dateline", False
 
@@ -178,6 +183,37 @@ class Book:
                 "noterefs": [int(n) for n in NOTE_MARK.findall(raw)]}
 
 
+def apply_speech_fixes(data):
+    """Đọc sua_cach_doc.csv; dòng có cột speech → thay bản đọc của câu có id đó.
+    id đánh tuần tự nên chỉ ổn định khi quy tắc tách câu không đổi: id không tìm thấy → dừng."""
+    if not FIXES_CSV.exists():
+        return
+    import csv
+    by_id = {}
+    for lv in data["levels"]:
+        for h in [lv, *lv["chapters"]]:
+            if h.get("dateline"):
+                by_id[h["dateline"]["id"]] = h["dateline"]
+            for p in h["paragraphs"]:
+                for s in p["sentences"]:
+                    by_id[s["id"]] = s
+    for n in data["notes"]:
+        for s in n["sentences"]:
+            by_id[s["id"]] = s
+    applied, unknown = 0, []
+    with FIXES_CSV.open(encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            sid = row["id"].strip()
+            if sid not in by_id:
+                unknown.append(sid)
+            elif row.get("speech", "").strip():
+                by_id[sid]["speech"] = row["speech"].strip()
+                applied += 1
+    if unknown:
+        sys.exit(f"DỪNG: {FIXES_CSV.name} có id không tồn tại {unknown} — quy tắc tách câu đã đổi?")
+    print(f"Sửa cách đọc: áp {applied} câu từ {FIXES_CSV.name}")
+
+
 def main():
     doc = pymupdf.open(PDF)
     book = Book()
@@ -203,6 +239,7 @@ def main():
         book.end_page()
 
     data = book.finalize()
+    apply_speech_fixes(data)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 

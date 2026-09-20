@@ -1,0 +1,9 @@
+/* Định dạng hiển thị DTBook. Thorium đổi mọi thẻ DTBook (noteref, dateline, note, sup…)
+   thành <div> rồi mới áp CSS này với selector được viết lại thành .ten_R2 — nên phải nói rõ
+   display cho các thẻ vốn là inline, không thì dấu chú thích [n] xuống dòng riêng. */
+noteref { display: inline; vertical-align: super; font-size: 0.7em; line-height: 0; color: #555; }
+dateline { display: block; font-style: italic; margin: 0 0 1em 0; }
+note { display: block; margin: 0.6em 0 0.8em 1.5em; padding-left: 0.6em; border-left: 2px solid #999; font-size: 0.9em; color: #333; }
+h1 { text-align: center; }
+h2 { margin-top: 1.5em; }
+p { text-align: justify; }
