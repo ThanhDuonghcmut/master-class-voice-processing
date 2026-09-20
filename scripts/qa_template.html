@@ -151,8 +151,14 @@ document.getElementById('export').onclick = () => {
     if (notes[c.id]) rows.push([c.id, g.id, g.title, c.text, notes[c.id].note || '', who.value.trim()]);
   if (rows.length === 1) { alert('Chưa ghi nhận lỗi nào.'); return; }
   if (!who.value.trim() && !confirm('Chưa điền tên người nghe — xuất với tên "khong-ten"?')) return;
-  const csv = '﻿' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
-  const a = document.createElement('a');
+  const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n') + '\n';
+  if (location.protocol.startsWith('http')) {          // qua make qa → server ghi thẳng vào qa/ trong repo
+    fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ who: name, csv }) })
+      .then(r => r.json()).then(r => alert(`Đã ghi ${r.path} (${r.n} câu).\nCommit: make submit-qa`))
+      .catch(() => alert('Không ghi được — server QA đã dừng? Chạy lại make qa.'));
+    return;
+  }
+  const a = document.createElement('a');                // mở từ file:// (bản release) → chỉ tải xuống được
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   a.download = `qa_${name}_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
 };
