@@ -27,10 +27,10 @@ Mỗi bước là một script trong `scripts/` (gộp DTBook và SMIL/NCX/OPF v
 | Đơn vị đồng bộ | **câu** | slide 6 yêu cầu cấp câu/cụm; TTS từng câu rồi **đo độ dài file** → `clipBegin/End` chính xác tuyệt đối, không cần forced alignment | từ (thừa), đoạn (không đạt yêu cầu) | không |
 | Chia mp3 | **1 file / truyện** (~89 file) | slide 9 khuyến nghị chia nhỏ; sửa 1 câu chỉ render lại 1 truyện | 1 file/sách, 1 file/tháng | truyện > 30 phút → cân nhắc tách |
 | TTS | **VieNeu-TTS v3 Turbo**, giọng **Đức Trí** (nam · Nam · đọc truyện) | người dùng chỉ định repo; đo thật trên M5 Pro: RTF 0,11 → cả sách ~1,5 h máy; miễn phí, offline, chạy lại vô hạn; 48 kHz; giọng chọn sau khi nghe 25 mẫu (`build/thu-giong/`) | edge-tts (dự phòng), Azure/Google (tốn tiền, online), Polly (không có tiếng Việt) | VieNeu đọc sai tên riêng Ý quá nhiều |
-| Chú thích `[n]` | `<noteref>` trong thân, `<note>` gom vào `<rearmatter>` "Chú thích", có audio riêng | đúng DTBook; trình đọc có skip logic bật/tắt; đọc chèn giữa câu phá mạch truyện | xoá hẳn (mất thông tin) | không |
+| Chú thích `[n]` | **đọc ngay sau đoạn chứa `[n]`** (sau dòng ngày nếu `[n]` ở tiêu đề), mở đầu "Chú thích:", không có "Hết chú thích"; `<note>` skippable mặc định đọc | người khiếm thị cần ngữ cảnh ngay lúc gặp từ lạ; skippability của DAISY sinh ra cho đúng việc này; khoảng nghỉ 1,2 s sau chú thích đủ làm ranh giới | gom cuối sách (92 chú thích liền nhau không số, vô dụng); cuối truyện (xa ngữ cảnh); xoá hẳn | không |
 | Mã hoá mp3 | `lameenc` (LAME qua pip) | không phụ thuộc ffmpeg (máy không có); pip cài được trong `requirements.txt` | ffmpeg (cài ngoài Python) | cần bitrate thay đổi |
 | Python | **3.12** | VieNeu hỗ trợ 3.10–3.13, repo ghim 3.12; onnxruntime chưa có wheel 3.14 | 3.14 (venv cũ) | VieNeu hỗ trợ 3.14 |
-| Khoảng nghỉ khi ghép | giữa câu **0,9 s** nghe được (0,8 + 2×0,05 lề), cuối đoạn 1,5 s, sau tiêu đề 1,9–2,3 s | **đo chính VieNeu**: đọc liền 12 cặp câu, nó tự nghỉ trung vị 0,71 s (0,52–0,89); người nghe thấy 0,45 s cũ "sát", 0,7 s "vẫn hơi nhanh" → lấy mức trên của dải | giữ im lặng gốc của từng clip (0,15–0,37 s, không đều); **time-stretch chậm 10–15 %** (librosa phase vocoder) — người nghe bác: quá chậm, âm nhoè | đổi giọng (mỗi giọng nhịp khác) → đo lại bằng đoạn code trong mục cạm bẫy 7 |
+| Khoảng nghỉ khi ghép | **chốt 2026-09-20:** giữa câu **0,7 s** nghe được (0,6 + 2×0,05 lề), cuối đoạn **1,2 s**, sau tiêu đề 1,7–2,0 s | **đo chính VieNeu**: đọc liền 12 cặp câu, nó tự nghỉ trung vị 0,71 s (0,52–0,89). Từng thử 0,9 s nhưng đó là khi clip SMIL chưa bao khoảng nghỉ (Thorium thực phát 0 s); sửa xong nghe lại trong Thorium thì 0,7 s vừa | giữ im lặng gốc của từng clip (0,15–0,37 s, không đều); **time-stretch chậm 10–15 %** (librosa phase vocoder) — người nghe bác: quá chậm, âm nhoè | đổi giọng (mỗi giọng nhịp khác) → đo lại bằng đoạn code trong mục cạm bẫy 7 |
 | Nhận diện cấu trúc | theo **font** (Arial-BoldMT 21 = tháng, Arial-BoldItalicMT 16 = truyện, BoldItal 16 sau h2 = dòng ngày, size 12 = chú thích) | PDF do calibre sinh, font nhất quán 100% qua khảo sát; bookmark chỉ để đối chiếu | heuristic chữ hoa / vị trí | đổi sách khác |
 
 ## Tiêu chí "xong" (kiểm chứng được)
@@ -39,7 +39,7 @@ Mỗi bước là một script trong `scripts/` (gộp DTBook và SMIL/NCX/OPF v
 - [x] Mỗi `<sent>` trong dtbook.xml có đúng một `<par>` trong smil, không thừa không thiếu (script kiểm số lượng)
 - [x] Tổng `clipEnd − clipBegin` của mỗi mp3 sai lệch < 0,1 s so với độ dài file thật
 - [x] `dtb:totalTime` trong .opf = tổng thời lượng mp3 (không phải 0:00:00 như mẫu)
-- [ ] Mở `.opf` bằng Thorium Reader: nhảy tới "THÁNG BA › Cậu bé chết" phát đúng câu đầu truyện đó; bật/tắt chú thích hoạt động
+- [ ] Import **zip** sách vào Thorium Reader: nhảy tới "THÁNG BA › Cậu bé chết" phát đúng câu đầu truyện đó; tắt chú thích trong cài đặt đọc thì bỏ qua "Chú thích:…"
 - [ ] Zip + sha256 đúng cây thư mục slide 21; `shasum -a 256 -c` báo OK
 
 ## Cạm bẫy đã gặp (đưa vào mục 4 báo cáo)

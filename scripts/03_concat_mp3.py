@@ -85,6 +85,7 @@ def main():
     for u in iter_units(book):
         by_group.setdefault(u.group, []).append(u)
     timing = json.loads(TIMING.read_text(encoding="utf-8")) if TIMING.exists() else {}
+    timing = {g: v for g, v in timing.items() if g in by_group}   # bỏ nhóm không còn trong sách
     total = 0.0
     for group in groups_in_order(book):
         result, status = build_group(group, by_group[group])
