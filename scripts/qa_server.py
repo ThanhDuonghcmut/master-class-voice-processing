@@ -1,7 +1,7 @@
 """Server cục bộ cho trang QA: phục vụ out/ qua http và nhận CSV ghi thẳng vào qa/.
 
 Vì sao cần: trang mở bằng file:// không được trình duyệt cho ghi file (sandbox), chỉ "tải xuống".
-Qua http://localhost thì nút Xuất POST về đây, file rơi đúng qa/<ten>_<YYYY-MM-DD_HHMM>.csv trong repo.
+Qua http://localhost thì nút Xuất POST về đây, file rơi đúng qa/<ten>_<YYYY-MM-DD_HHMMSS>.csv trong repo.
 
     .venv/bin/python scripts/qa_server.py          # mở http://localhost:8765/qa.html, Ctrl+C để dừng
 """
@@ -29,7 +29,7 @@ class Handler(SimpleHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         who = re.sub(r"[^A-Za-z0-9-]+", "-", body.get("who") or "khong-ten").strip("-") or "khong-ten"
         QA.mkdir(exist_ok=True)
-        path = QA / f"qa_{who}_{datetime.now():%Y-%m-%d_%H%M}.csv"
+        path = QA / f"qa_{who}_{datetime.now():%Y-%m-%d_%H%M%S}.csv"
         path.write_text(body["csv"], encoding="utf-8")
         n = body["csv"].count("\n") - 1
         print(f"  ghi {path.relative_to(ROOT)} ({n} câu)")

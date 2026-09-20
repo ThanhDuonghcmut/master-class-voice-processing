@@ -25,7 +25,7 @@ Trong trang QA:
 
 Ghi chú nên nói **lỗi gì và ở từ nào**: "nghỉ sai sau *giáo*", "đọc *4,444* thành bốn nghìn", "tên *Garrone* đọc lạ". Điền **tên người nghe** ở ô trên cùng trước khi xuất — tên vào file CSV để không đè nhau.
 
-**⬇ Xuất CSV** khi mở qua `make qa` sẽ ghi thẳng `qa/qa_<tên>_<ngày>_<giờ>.csv` vào repo (trang chạy qua server cục bộ — trình duyệt không cho trang `file://` ghi file). Rồi:
+**⬇ Xuất CSV** khi mở qua `make qa` sẽ ghi thẳng `qa/qa_<tên>_<ngày>_<giờ-phút-giây>.csv` vào repo (trang chạy qua server cục bộ — trình duyệt không cho trang `file://` ghi file). Rồi:
 
 ```bash
 make submit-qa        # commit + push mọi CSV mới trong qa/
