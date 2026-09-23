@@ -41,6 +41,34 @@ MIN_SENT_CHARS = 12  # câu ngắn hơn ("Ôi!") gộp vào câu kế: TTS dễ 
 SOURCE_FIXES = {
     "châu u ": "châu Âu ",   # calibre làm mất chữ "Â" hoa (chỉ 1 chỗ, đã rà toàn sách)
     "4,444 km": "4 phẩy 444 km",  # VieNeu coi dấu phẩy là phân cách nghìn → "bốn nghìn"; chỗ duy nhất có số lẻ
+    # Lỗi chính tả của bản ebook (calibre/OCR). Rà toàn sách bằng scripts/data/am_tiet_tieng_viet.txt
+    # (danh sách 6.775 âm tiết) + luật "âm tiết không thể có 2 dấu thanh"; mỗi chỗ đã soi ngữ cảnh.
+    # Sửa cả chữ hiển thị vì sách in chắc chắn không sai những chỗ này.
+    "cổng chmh": "cổng chính",
+    "chỉ đuờng phố": "chỉ đường phố",
+    "chen nhau đểđược": "chen nhau để được",
+    "nhiêu ngườí Ý": "nhiêu người Ý",
+    "mỉm cuời": "mỉm cười",
+    "nhìn theo eậu bé": "nhìn theo cậu bé",
+    "hình như eả hai": "hình như cả hai",
+    "thành hai dãý": "thành hai dãy",
+    "ghen tị lụồn vào": "ghen tị luồn vào",
+    "chịu đựng, rồị vừa": "chịu đựng, rồi vừa",
+    "đựng mọỉ sự": "đựng mọi sự",
+    "những tìếng kêu": "những tiếng kêu",
+    "Venezia, ngưởi Lombardia": "Venezia, người Lombardia",
+    "lòng đầy can dảm": "lòng đầy can đảm",
+    "chờ dón con mình": "chờ đón con mình",
+    "thiếu lễ dộ": "thiếu lễ độ",
+    "nuôi gia dình": "nuôi gia đình",
+    "trong sưởng thủy tinh": "trong xưởng thủy tinh",
+    "muốn khuyu, đầu gục": "muốn khuỵu, đầu gục",
+    "chẳng có gì bất điệt": "chẳng có gì bất diệt",
+    "một vờng hoa lớn": "một vòng hoa lớn",
+    "De Amlcis": "De Amicis",          # OCR: i → l
+    "DeAmicis rất": "De Amicis rất",   # dính hai chữ
+    "Hà Lan (l874)": "Hà Lan (1874)",  # OCR: số 1 → chữ l, TTS đọc thành chữ cái
+    "sociale, l894": "sociale, 1894",
 }
 
 

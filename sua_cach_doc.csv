@@ -1,2 +1,14 @@
-id,speech,ghi_chu
-s000255,"Thầy giáo mới, ngay từ sáng hôm nay đã làm cho tất cả chúng tôi đều rất thích.","VieNeu nghỉ sai sau ""giáo"" (hiểu ""mới"" là trạng từ); thêm phẩy ép gom cụm"
+id,speech,doc_lai,ghi_chu
+s000255,"Thầy giáo mới, ngay từ sáng hôm nay đã làm cho tất cả chúng tôi đều rất thích.",,"VieNeu nghỉ sai sau ""giáo"" (hiểu ""mới"" là trạng từ); thêm phẩy ép gom cụm"
+s003288,,x,[GiaGia] Vế đầu đoạn 'tất của thời thơ ấu ấy' giọng đọc bị khựng vài nhịp ngắn và tương đối cứng
+s003333,,,"[GiaGia] Sai chính tả: 'cổng chmh' --> 'cổng chính' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
+s003390,,,"[GiaGia] Dính chử 'đểđược' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
+s003441,,x,"[GiaGia] Giọng nói nị lặp lại từ phần 'đã tưởng, rồi tội nghiệp' rồi nói thêm lại 'đã tưởng'"
+s003548,,,"[GiaGia] Lỗi đọc lặp từ 'người ở Ý Ý' nhìn chính tả trong sách gốc bị sai 'ngườí' chữ ngườ-í' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
+s003608,,,"[GiaGia] Sai chính tả chữ 'đường' nên khiến giọng đọc bị lập/sai — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
+s003622,,x,[GiaGia] Chữ mẹ ơi đọc lố một lần thành ba lần nhưng xét ngữ cảnh vẫn OK :))
+s003678,,x,[GiaGia] Chữ này lập 3 lần thay vì 2
+s004264,,x,[GiaGia] Lặp 3 lần đi đi thay vì 2
+s004278,,x,[GiaGia] Lặp tiếp 3 lần thay vì 2 từ 'nhanh lên'
+s004387,,x,[GiaGia] 'luôn luôn ở cạnh cháu' lập lại 2 lần
+s004414,,x,[GiaGia] Lập 3 lần chữ 'không' thay vì 2 lần
