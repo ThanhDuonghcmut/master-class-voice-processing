@@ -69,7 +69,14 @@ SOURCE_FIXES = {
     "DeAmicis rất": "De Amicis rất",   # dính hai chữ
     "Hà Lan (l874)": "Hà Lan (1874)",  # OCR: số 1 → chữ l, TTS đọc thành chữ cái
     "sociale, l894": "sociale, 1894",
+    "Gặp người lại mà tụt": "Gập người lại mà tụt",   # ố→ấ, ậ→ặ: lỗi hệ thống của bản ebook
+    "cậu bé tất bụng": "cậu bé tốt bụng",
+    "tình bạn tất của": "tình bạn tốt của",
+    "trở về thành'phố": "trở về thành phố",           # dấu nháy lọt giữa từ
 }
+
+# Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
+SPEECH_FIXES = {}
 
 
 def line_kind(line):
@@ -125,6 +132,14 @@ def split_sentences(text):
         last = merged.pop()               # câu cuối quá ngắn thì gộp ngược
         merged[-1] += " " + last
     return merged
+
+
+def speech_of(raw):
+    """Bản đọc: bỏ dấu chú thích [n], áp SPEECH_FIXES (chữ hiển thị giữ nguyên)."""
+    text = NOTE_MARK.sub("", raw).strip()
+    for bad, good in SPEECH_FIXES.items():
+        text = re.sub(rf"\b{re.escape(bad)}\b", good, text)
+    return text
 
 
 def ends_open(text):
@@ -201,13 +216,13 @@ class Book:
 
     def _heading(self, raw):
         """Tiêu đề có thể chứa [n] ("Cậu bé xứ Calabria[5]") → tách riêng bản đọc."""
-        return {"title": raw, "speech": NOTE_MARK.sub("", raw).strip(),
+        return {"title": raw, "speech": speech_of(raw),
                 "noterefs": [int(n) for n in NOTE_MARK.findall(raw)]}
 
     def _sentence(self, raw):
         self.n_sent += 1
         return {"id": f"s{self.n_sent:06d}", "raw": raw,
-                "speech": NOTE_MARK.sub("", raw).strip(),        # bỏ [n] khi đọc
+                "speech": speech_of(raw),
                 "noterefs": [int(n) for n in NOTE_MARK.findall(raw)]}
 
 

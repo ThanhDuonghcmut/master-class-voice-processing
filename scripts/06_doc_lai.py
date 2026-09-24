@@ -6,7 +6,9 @@ không nhất quán), nhưng bản lặp thừa LUÔN dài hơn bản đúng →
 lượng gần kỳ vọng nhất (kỳ vọng = số ký tự × giây/ký tự đo trên cả sách).
 
 Câu cần đọc lại lấy từ cột `doc_lai` trong sua_cach_doc.csv (điền "x"), hoặc truyền id trực tiếp.
-Bản cũ lưu ở build/doc_lai_cu/ để so; nghe không ưng thì chạy lại, mỗi lần ra bản khác.
+Chỉ ghi đè khi bản mới GẦN KỲ VỌNG HƠN bản đang có; bản cũ lưu ở build/doc_lai_cu/ để so.
+Xong thì cột doc_lai tự thành "xong-<ngày>" để lần chạy sau không đọc lại nữa — nghe vẫn chưa
+ưng thì sửa lại thành "x" rồi chạy tiếp, mỗi lần sampling ra bản khác.
 
     .venv/bin/python scripts/06_doc_lai.py                 # mọi id có doc_lai="x"
     .venv/bin/python scripts/06_doc_lai.py s004387 s003622 # id cụ thể
@@ -38,7 +40,25 @@ def ids_from_csv():
     if not FIXES_CSV.exists():
         return []
     with FIXES_CSV.open(encoding="utf-8-sig") as f:
-        return [r["id"].strip() for r in csv.DictReader(f) if r.get("doc_lai", "").strip()]
+        return [r["id"].strip() for r in csv.DictReader(f) if r.get("doc_lai", "").strip() == "x"]
+
+
+def mark_done(ids):
+    """doc_lai: "x" → "xong-<ngày>" cho những id vừa xử lý."""
+    if not FIXES_CSV.exists():
+        return
+    from datetime import date
+    with FIXES_CSV.open(encoding="utf-8-sig") as f:
+        rows, fields = list(csv.DictReader(f)), None
+        f.seek(0)
+        fields = next(csv.reader(f))
+    for r in rows:
+        if r["id"].strip() in ids and r.get("doc_lai") == "x":
+            r["doc_lai"] = f"xong-{date.today()}"
+    with FIXES_CSV.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows(rows)
 
 
 def main(argv):
@@ -66,6 +86,10 @@ def main(argv):
         lan_doc = [tts.infer(u.text, voice=VOICE) for _ in range(lan)]
         durs = [len(a) / SR for a in lan_doc]
         best = min(range(lan), key=lambda i: abs(durs[i] - expect))
+        if wav.exists() and abs(cu - expect) <= abs(durs[best] - expect):
+            print(f"{sid} [{u.group}] giữ bản cũ {cu:5.1f}s (kỳ vọng {expect:5.1f}s; "
+                  f"{lan} lần đều xa hơn: {', '.join('%.1f' % d for d in durs)})")
+            continue
         if wav.exists():
             shutil.copy(wav, BACKUP / f"{sid}.wav")
         wav.parent.mkdir(parents=True, exist_ok=True)
@@ -74,6 +98,8 @@ def main(argv):
         print(f"{sid} [{u.group}] cũ {cu:5.1f}s → mới {durs[best]:5.1f}s (kỳ vọng {expect:5.1f}s; "
               f"{lan} lần: {', '.join('%.1f' % d for d in durs)})")
         print(f"   {u.text[:95]}")
+    if not argv:
+        mark_done(set(ids))
     print(f"\nBản cũ giữ ở {BACKUP.relative_to(ROOT)}/ để so. Tiếp: 03_concat_mp3.py rồi 04_build_daisy.py")
 
 

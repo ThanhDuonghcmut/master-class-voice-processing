@@ -1,14 +1,34 @@
 id,speech,doc_lai,ghi_chu
+lv2-048,,,[Triết] hình như đọc sai là tót ta
 s000255,"Thầy giáo mới, ngay từ sáng hôm nay đã làm cho tất cả chúng tôi đều rất thích.",,"VieNeu nghỉ sai sau ""giáo"" (hiểu ""mới"" là trạng từ); thêm phẩy ép gom cụm"
-s003288,,x,[GiaGia] Vế đầu đoạn 'tất của thời thơ ấu ấy' giọng đọc bị khựng vài nhịp ngắn và tương đối cứng
+s001556,,,[Triết] gập người lại chứ nhỉ? — đã sửa chính tả ở SOURCE_FIXES
+s001579,,,[Triết] cậu bé — đã sửa chính tả ở SOURCE_FIXES
+s001589,,xong-2026-09-24,"[Triết] ""đạn bắn như điên cuồng"" bị dừng lại sau đạn bắn"
+s001593,,xong-2026-09-24,"[Triết] bị lặp lại ""đầu hàng, đe dọa giết chết họ"""
+s001619,,,[Triết] dãy — đã sửa chính tả ở SOURCE_FIXES
+s001628,,xong-2026-09-24,[Triết] hình như bị cắt dòng sai
+s001673,,,"[Triết] bao lơn của con tàu"" đúng hong ta"
+s001677,,,"[Triết] ""thành phố"" bị dính lại — đã sửa chính tả ở SOURCE_FIXES"
+s001696,,,[Triết] lụ ồn bị dính chữ — đã sửa chính tả ở SOURCE_FIXES
+s001751,,,"[Triết] ""rồi"" bị sai chính tả — đã sửa chính tả ở SOURCE_FIXES"
+s001809,,,[Triết] cậu bé tất bụng ??? — đã sửa chính tả ở SOURCE_FIXES
+s001932,,xong-2026-09-24,"[Triết] bị lặp lại ""đã vui lòng cho tôi được hôn tay"""
+s001956,,,[Triết] ta-ta nhưng đọc chỉ là ta
+s001971,,,[Triết] có vẻ từ tata này đọc cũng như trên
+s002003,,,[Triết] chổ này cũng có tên tata chắc đọc như trên
+s002008,,,[Triết] Có tên Tata
+s002014,,,[Triết] cũng có tata
+s002055,,xong-2026-09-24,[Triết] ngắt ở chổ chữ ánh hơi kì xíu
+s002122,,xong-2026-09-24,[Triết] trong voice có 3 từ tạm biệt
+s003288,,xong-2026-09-24,[GiaGia] Vế đầu đoạn 'tất của thời thơ ấu ấy' giọng đọc bị khựng vài nhịp ngắn và tương đối cứng
 s003333,,,"[GiaGia] Sai chính tả: 'cổng chmh' --> 'cổng chính' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
 s003390,,,"[GiaGia] Dính chử 'đểđược' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
-s003441,,x,"[GiaGia] Giọng nói nị lặp lại từ phần 'đã tưởng, rồi tội nghiệp' rồi nói thêm lại 'đã tưởng'"
+s003441,,xong-2026-09-24,"[GiaGia] Giọng nói nị lặp lại từ phần 'đã tưởng, rồi tội nghiệp' rồi nói thêm lại 'đã tưởng'"
 s003548,,,"[GiaGia] Lỗi đọc lặp từ 'người ở Ý Ý' nhìn chính tả trong sách gốc bị sai 'ngườí' chữ ngườ-í' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
 s003608,,,"[GiaGia] Sai chính tả chữ 'đường' nên khiến giọng đọc bị lập/sai — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
-s003622,,x,[GiaGia] Chữ mẹ ơi đọc lố một lần thành ba lần nhưng xét ngữ cảnh vẫn OK :))
-s003678,,x,[GiaGia] Chữ này lập 3 lần thay vì 2
-s004264,,x,[GiaGia] Lặp 3 lần đi đi thay vì 2
-s004278,,x,[GiaGia] Lặp tiếp 3 lần thay vì 2 từ 'nhanh lên'
-s004387,,x,[GiaGia] 'luôn luôn ở cạnh cháu' lập lại 2 lần
-s004414,,x,[GiaGia] Lập 3 lần chữ 'không' thay vì 2 lần
+s003622,,xong-2026-09-24,[GiaGia] Chữ mẹ ơi đọc lố một lần thành ba lần nhưng xét ngữ cảnh vẫn OK :))
+s003678,,xong-2026-09-24,[GiaGia] Chữ này lập 3 lần thay vì 2
+s004264,,xong-2026-09-24,[GiaGia] Lặp 3 lần đi đi thay vì 2
+s004278,,xong-2026-09-24,[GiaGia] Lặp tiếp 3 lần thay vì 2 từ 'nhanh lên'
+s004387,,xong-2026-09-24,[GiaGia] 'luôn luôn ở cạnh cháu' lập lại 2 lần
+s004414,,xong-2026-09-24,[GiaGia] Lập 3 lần chữ 'không' thay vì 2 lần
