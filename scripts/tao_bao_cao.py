@@ -36,6 +36,10 @@ def so_lieu():
     qa_files = sorted((ROOT / "qa").glob("*.csv"))
     qa = {f.stem: list(csv.DictReader(f.open(encoding="utf-8-sig"))) for f in qa_files}
     mp3 = list((BUILD / "mp3").glob("*.mp3"))
+    quet = {}
+    for f in BUILD.glob("asr_quet*.csv"):
+        rows = list(csv.DictReader(f.open(encoding="utf-8")))
+        quet[f.stem] = rows
     src = (ROOT / "scripts" / "01_extract_pdf.py").read_text(encoding="utf-8")
     n_chinh_ta = src.count('": "', src.index("SOURCE_FIXES"), src.index("SPEECH_FIXES"))
     tong_giay = sum(v["duration"] for v in timing.values())
@@ -57,6 +61,7 @@ def so_lieu():
         "n_sua_doc": sum(1 for r in fixes if r.get("speech")),
         "n_qa_cau": sum(len(v) for v in qa.values()),
         "so_file_sach": len(list((ROOT / "out" / meta["slug"]).iterdir())),
+        "quet_cau": sum(len(v) for v in quet.values()),
     }
 
 
@@ -267,15 +272,37 @@ def viet(d):
         ["Phần 3", "3 giờ 20 phút", "Dưỡng bệnh", "Từ biệt"],
     ], widths=[2, 3, 5.5, 5.5])
 
+    b.p("Song song với việc nghe thủ công, nhóm dựng thêm một bước kiểm tự động: cho một mô hình "
+        "nhận dạng tiếng nói nghe ngược lại chính file âm thanh vừa sinh, rồi so bản nghe được với "
+        "văn bản gốc. Máy quét được cả cuốn sách trong khi tai người chỉ nghe hết được từng phần, "
+        "nên hai cách bổ sung cho nhau: máy bắt lỗi đọc lặp và đọc thiếu nằm rải rác, tai người bắt "
+        "những lỗi máy không thấy như ngắt nhịp gượng hay giọng đọc đơ.")
+    b.p("Điều đáng lưu ý là không thể chỉ dựa vào mức giống nhau giữa hai bản để kết luận. Ở một câu "
+        "dài, đọc lặp thừa một cụm chỉ kéo mức giống xuống vài phần trăm, vẫn nằm trên mọi ngưỡng hợp "
+        "lý. Vì vậy chương trình dò dấu hiệu trực tiếp:")
+    b.bullet("Đọc lặp: đếm số lần một cụm từ 1 đến 4 từ lặp ngay sau chính nó trong bản nghe được, so "
+             "với số lần trong văn bản gốc. Phép đếm thực hiện trên dạng đã bỏ dấu thanh, vì nhận dạng "
+             "tiếng nói hay nghe từ láy thành từ lặp.")
+    b.bullet("Đọc thiếu: so số từ của bản nghe được với văn bản gốc, sau khi bỏ các từ chỉ số vì bản "
+             "nghe được viết số bằng chữ số còn sách viết bằng chữ.")
+    b.p("Danh sách máy đưa ra là danh sách nghi vấn chứ không phải kết luận, vì mô hình nhận dạng cũng "
+        "nghe sai, nhất là tên riêng nước ngoài. Nhóm lọc bớt các trường hợp báo nhầm đã biết rồi mới "
+        "đưa người nghe kiểm lại từng câu.")
+
     b.h("2.6. Bước 6 – Sửa lỗi và đóng gói", 2)
     b.p("Các file ghi nhận của mọi người được gộp thành một bảng sửa duy nhất, mỗi câu một dòng, giữ "
         "nguyên ghi chú của từng người. Bảng này có hai cột điều khiển:")
     b.bullet("Cột bản đọc: điền cách đọc mới cho câu, còn chữ hiển thị trong sách vẫn giữ nguyên văn. "
              "Dùng khi công cụ đọc sai mà văn bản không sai, ví dụ đọc số thập phân theo kiểu phân cách "
              "hàng nghìn, hoặc ngắt nhịp sai ở câu có cấu trúc nhập nhằng.")
-    b.bullet("Cột đọc lại: đánh dấu những câu bị lặp cụm từ hoặc ngắt nhịp gượng. Chương trình sẽ đọc lại "
-             "câu đó nhiều lần rồi chọn bản gần độ dài kỳ vọng nhất, và chỉ thay thế khi bản mới tốt hơn "
-             "bản đang có.")
+    b.bullet("Cột đọc lại: đánh dấu những câu bị lặp cụm từ hoặc ngắt nhịp gượng. Công cụ sinh tiếng nói "
+             "lấy mẫu ngẫu nhiên nên mỗi lần đọc cho ra một bản khác nhau; chương trình đọc lại câu đó "
+             "nhiều lần, dùng nhận dạng tiếng nói chấm điểm từng bản, ưu tiên bản không còn dấu hiệu lặp "
+             "rồi mới xét mức giống, và chỉ thay khi bản mới tốt hơn bản đang có.")
+    b.p("Với một số câu, đọc lại bao nhiêu lần cũng lặp vì chính cấu trúc câu gây ra, chẳng hạn câu kết "
+        "thúc bằng “không bao giờ, không bao giờ!”. Khi đó nhóm sửa bản đọc để phá thế lặp, ví dụ tách "
+        "thành hai câu ngắn bằng dấu chấm than, còn chữ hiển thị trong sách vẫn giữ nguyên văn. Cách này "
+        "cũng dùng để sửa chỗ ngắt nhịp sai.")
     b.p("Riêng lỗi chính tả của bản điện tử thì sửa thẳng vào bảng sửa nguồn, đổi cả chữ hiển thị lẫn "
         "cách đọc, vì bản in gốc không sai những chỗ đó.")
     b.p("Sau khi sửa, sách được dựng lại rồi nén kèm file chứa mã băm SHA-256 theo đúng cấu trúc thư mục "
@@ -300,6 +327,7 @@ def viet(d):
         ["PyMuPDF", "Đọc PDF kèm thông tin phông chữ của từng dòng, phục vụ việc nhận dạng cấu trúc sách"],
         ["soundfile, NumPy", "Đọc và ghi tín hiệu âm thanh, cắt khoảng lặng, ghép các câu"],
         ["lameenc", "Mã hoá MP3 ngay trong Python, không phụ thuộc công cụ cài ngoài"],
+        ["faster-whisper", "Nhận dạng tiếng nói để nghe ngược bản đọc, tìm câu đọc lặp hoặc đọc thiếu"],
         ["python-docx", "Sinh file báo cáo này từ số liệu thật của dự án"],
     ], widths=[4, 12])
     b.p("Danh sách 6.775 âm tiết tiếng Việt lấy từ đồ án trước của môn học được dùng để dò lỗi chính tả "
@@ -340,6 +368,11 @@ def viet(d):
     b.bullet(f'{d["n_doc_lai"]} câu bị đọc lặp cụm từ hoặc ngắt nhịp gượng đã được sinh lại.')
     b.bullet(f'{d["n_sua_doc"]} câu được chỉnh cách đọc bằng cách thêm dấu ngắt vào bản đọc, giữ nguyên chữ '
              f'trong sách.')
+    b.p(f'Bước kiểm tự động quét {d["quet_cau"]:,} câu, chỉ ra những câu có dấu hiệu đọc lặp hoặc đọc '
+        f'thiếu để người nghe kiểm lại. Trong số câu máy nghi ở phần đã đối chiếu, ba câu đúng là lỗi '
+        f'thật và đều là lỗi mà người nghe đã bỏ sót; các trường hợp còn lại là mô hình nhận dạng nghe '
+        f'sai tên riêng nước ngoài. Sau khi bổ sung các luật lọc báo nhầm, số câu máy đưa ra để kiểm lại '
+        f'giảm còn khoảng ba phần nghìn tổng số câu.'.replace(",", "."))
     b.p("Một phát hiện đáng chú ý từ khâu kiểm thính: nhiều lỗi chính tả của bản điện tử là từ viết đúng "
         "chính tả nhưng sai ngữ cảnh, ví dụ “tốt bụng” thành “tất bụng”, “gập người” thành “gặp người”. "
         "Chương trình dò tự động bằng từ điển âm tiết không bắt được những trường hợp này vì cả hai từ đều "
@@ -361,8 +394,9 @@ def viet(d):
          "đứng trước"],
         ["Công cụ sinh tiếng nói thỉnh thoảng lặp một cụm từ, thường ở câu vốn đã có từ lặp như “đi đi, "
          "đi đi”",
-         "Thử điều chỉnh tham số phạt lặp và độ ngẫu nhiên nhưng không ổn định; cách dùng được là đọc lại "
-         "nhiều lần rồi chọn bản có độ dài gần mức kỳ vọng nhất, vì bản bị lặp luôn dài hơn"],
+         "Thử điều chỉnh tham số phạt lặp và độ ngẫu nhiên nhưng không ổn định. Cách dùng được là đọc lại "
+         "nhiều lần rồi dùng nhận dạng tiếng nói chọn bản không còn lặp; câu nào đọc lại bao nhiêu lần "
+         "cũng lặp thì sửa dấu câu trong bản đọc để phá thế lặp"],
         ["Công cụ đọc sai ở câu có cấu trúc nhập nhằng, ví dụ ngắt nhịp sau “thầy giáo” thay vì sau “thầy "
          "giáo mới”",
          "Thêm dấu phẩy vào bản đọc để ép gom cụm, giữ nguyên chữ hiển thị trong sách"],
@@ -375,6 +409,14 @@ def viet(d):
         ["Thư viện sinh tiếng nói không cài được trên phiên bản Python mới nhất",
          "Chương trình cài đặt tự kiểm tra phiên bản Python đang có, nếu không phù hợp thì tự tải về một "
          "phiên bản dùng được rồi tạo môi trường riêng"],
+        ["Chỉ dựa vào mức giống nhau giữa bản nghe được và văn bản gốc thì bỏ sót lỗi: ở câu dài, lặp "
+         "thừa một cụm chỉ làm mức giống giảm vài phần trăm",
+         "Dò dấu hiệu trực tiếp là cụm từ lặp liên tiếp và số từ bị thiếu, thay cho việc đặt ngưỡng trên "
+         "mức giống"],
+        ["Mô hình nhận dạng nghe sai tên riêng nước ngoài, tách một tên thành hai tiếng giống nhau nên "
+         "bị báo nhầm là đọc lặp",
+         "Bỏ qua cụm lặp trùng với tên riêng hoặc từ không phải âm tiết tiếng Việt; đếm trên dạng đã bỏ "
+         "dấu thanh để từ láy không bị coi là lặp"],
     ], widths=[7.5, 8.5])
 
     # --- 6. Phân công ---
@@ -395,13 +437,12 @@ def viet(d):
         f'gồm sáu bước, đi từ trích cấu trúc sách trong PDF, sinh giọng đọc bằng mô hình tiếng Việt mã nguồn '
         f'mở chạy trên máy cá nhân, ghép âm thanh theo từng truyện, dựng bộ file theo tiêu chuẩn, kiểm thính '
         f'và sửa lỗi.')
-    b.p("Hạn chế còn lại nằm ở khâu kiểm thính. Lỗi ngắt nhịp và lỗi lặp cụm từ của công cụ sinh tiếng "
-        "nói hiện chỉ phát hiện được bằng tai người nghe, chưa có cách kiểm tự động, nên chất lượng cuối "
-        "cùng phụ thuộc vào việc nghe soát hết cuốn sách.")
-    b.p("Hướng phát triển: dùng một mô hình nhận dạng tiếng nói đọc ngược file âm thanh rồi so với văn bản "
-        "gốc để tự phát hiện câu đọc lặp hoặc đọc thiếu, thay cho việc nghe thủ công; bổ sung đánh số trang "
-        "theo bản in để người nghe tra cứu theo trang sách giấy; và áp dụng lại bộ chương trình cho những "
-        "cuốn sách khác có cùng dạng nguồn.")
+    b.p("Hạn chế còn lại nằm ở khâu kiểm thính. Bước kiểm tự động bắt được lỗi đọc lặp và đọc thiếu, "
+        "nhưng lỗi ngắt nhịp gượng và giọng đọc đơ thì vẫn phải nghe bằng tai, nên chất lượng cuối cùng "
+        "phụ thuộc vào việc nghe soát hết cuốn sách.")
+    b.p("Hướng phát triển: mở rộng bước kiểm tự động để bắt thêm lỗi ngắt nhịp và lỗi đọc sai tên riêng, "
+        "là hai loại hiện vẫn phải nghe bằng tai; bổ sung đánh số trang theo bản in để người nghe tra cứu "
+        "theo trang sách giấy; và áp dụng lại bộ chương trình cho những cuốn sách khác có cùng dạng nguồn.")
     return b
 
 
