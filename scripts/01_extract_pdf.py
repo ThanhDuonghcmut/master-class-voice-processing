@@ -82,6 +82,12 @@ RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
      "bang": ["- Cậu ở đây à? - Ông đại úy ngạc nhiên hỏi",
               "– Hoan hô! Cậu đã làm tròn nhiệm vụ!"]},
+    # Lời kêu nằm cuối câu dài thì TTS đọc thành bốn lần dù đọc lại tám lần; tách riêng ra
+    # câu ngắn thì đọc đúng hai lần.
+    {"thay": ["s001069"],
+     "bang": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
+              "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
+              "“Cứu với! Cứu với!”"]},
 ]
 
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
