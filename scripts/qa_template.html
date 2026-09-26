@@ -47,7 +47,14 @@
     <h2 id="title"></h2>
     <span class="stat" id="stat"></span>
     <input id="who" placeholder="Tên người nghe" title="Vào tên file CSV và cột nguoi" style="font:inherit;font-size:13px;padding:4px 8px;border:1px solid #bbb;border-radius:5px;width:140px">
+    <label style="font-size:13px;color:var(--muted)">Tốc độ
+      <select id="rate" style="font:inherit;font-size:13px;padding:4px 6px;border:1px solid #bbb;border-radius:5px">
+        <option value="1">1×</option><option value="1.25">1,25×</option><option value="1.5">1,5×</option>
+        <option value="1.75">1,75×</option><option value="2">2×</option><option value="2.5">2,5×</option>
+      </select>
+    </label>
     <button id="playAll">▶ Nghe cả truyện</button>
+    <button id="pause">⏸ Tạm dừng</button>
     <button id="export" class="primary">⬇ Xuất CSV lỗi</button>
     <button id="clear">Xoá ghi nhận</button>
   </header>
@@ -55,7 +62,7 @@
 </main>
 <footer>
   <audio id="audio" controls preload="none"></audio>
-  <span>Bấm vào câu để nghe · <kbd>Space</kbd> dừng/tiếp · <kbd>↓</kbd> câu kế · tick ☐ rồi ghi chú (lưu trong trình duyệt) · xong thì ⬇ Xuất CSV (ghi vào qa/ của repo) rồi <code>make submit-qa</code></span>
+  <span>Bấm vào câu để nghe · <kbd>Space</kbd> dừng/tiếp · <kbd>↓</kbd> câu kế · <kbd>[</kbd> <kbd>]</kbd> đổi tốc độ · tick ☐ rồi ghi chú (lưu trong trình duyệt) · xong thì ⬇ Xuất CSV (ghi vào qa/ của repo) rồi <code>make submit-qa</code></span>
 </footer>
 <script id="data" type="application/json">__DATA__</script>
 <script>
@@ -63,6 +70,12 @@ const DATA = JSON.parse(document.getElementById('data').textContent);
 const KEY = 'qa:' + DATA.slug;
 const audio = document.getElementById('audio');
 let notes = {}; try { notes = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const rate = document.getElementById('rate');
+try { rate.value = localStorage.getItem('qa:rate') || '1'; } catch (e) {}
+const apDungTocDo = () => { audio.playbackRate = parseFloat(rate.value) || 1; };
+rate.onchange = () => { apDungTocDo(); try { localStorage.setItem('qa:rate', rate.value); } catch (e) {} };
+audio.addEventListener('loadedmetadata', apDungTocDo);   // đổi truyện là src mới, phải đặt lại
+audio.addEventListener('play', apDungTocDo);
 const who = document.getElementById('who');
 try { who.value = localStorage.getItem('qa:who') || ''; } catch (e) {}
 who.oninput = () => { try { localStorage.setItem('qa:who', who.value); } catch (e) {} };
@@ -146,11 +159,23 @@ audio.ontimeupdate = () => {        // bắn mỗi ~0,25 s → khi nghe liên t�
   }
 };
 document.getElementById('playAll').onclick = () => play(0, true);
+const nutPause = document.getElementById('pause');
+nutPause.onclick = () => { audio.paused ? audio.play() : audio.pause(); };
+const capNhatNut = () => { nutPause.textContent = audio.paused ? '▶ Tiếp tục' : '⏸ Tạm dừng'; };
+audio.addEventListener('play', capNhatNut);
+audio.addEventListener('pause', capNhatNut);
+capNhatNut();
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'TEXTAREA') return;
   if (e.code === 'Space') { e.preventDefault(); audio.paused ? audio.play() : audio.pause(); }
   if (e.code === 'ArrowDown' && clipIdx + 1 < clips.length) { e.preventDefault(); play(clipIdx + 1, continuous); }
   if (e.code === 'ArrowUp' && clipIdx > 0) { e.preventDefault(); play(clipIdx - 1, continuous); }
+  if (e.key === '[' || e.key === ']') {          // [ chậm lại, ] nhanh lên
+    const muc = [...rate.options].map(o => o.value);
+    let i = muc.indexOf(rate.value) + (e.key === ']' ? 1 : -1);
+    rate.value = muc[Math.max(0, Math.min(muc.length - 1, i))];
+    rate.onchange();
+  }
 });
 
 // ---------- xuất / xoá ----------
