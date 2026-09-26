@@ -25,9 +25,50 @@ def nap_mo_hinh():
     return _asr
 
 
-def nghe_nguoc(path):
-    segs, _ = nap_mo_hinh().transcribe(str(path), language="vi", beam_size=5)
-    return " ".join(s.text.strip() for s in segs)
+def nghe_nguoc(path, moc_tu=False):
+    """Trả văn bản ASR; moc_tu=True thì trả thêm [(từ, giây bắt đầu, giây kết thúc), …].
+    Bật mốc từ làm ASR chậm thêm khoảng 25%, nhưng có mốc mới dò được ngắt nhịp sai."""
+    segs, _ = nap_mo_hinh().transcribe(str(path), language="vi", beam_size=5, word_timestamps=moc_tu)
+    segs = list(segs)
+    text = " ".join(s.text.strip() for s in segs)
+    if not moc_tu:
+        return text
+    return text, [(w.word.strip(), round(w.start, 3), round(w.end, 3))
+                  for s in segs for w in (s.words or [])]
+
+
+def ngat_nhip(text, moc, nghi_min=0.45, boi=1.8):
+    """Dò chỗ NGẮT SAI: nghỉ dài ở giữa câu mà chỗ đó không có dấu câu trong bản đọc
+    ("Thầy giáo | mới ngay từ sáng").
+
+    Hai điều đã học khi hiệu chỉnh:
+      - Không xét "đọc liền qua dấu phẩy": tiếng Việt đọc liền qua dấu phẩy là bình thường,
+        tiêu chí này báo tới 30% số câu.
+      - Không dùng ngưỡng tuyệt đối: câu dài nào cũng có nhịp lấy hơi 0,3-0,4 giây. Chỉ báo khi
+        khoảng nghỉ vượt nghi_min VÀ dài hơn `boi` lần trung vị các khoảng nghỉ của chính câu đó.
+    Cần dóng hàng từ ASR với từ gốc vì ASR nghe sai một số từ."""
+    from difflib import SequenceMatcher
+    goc_tu = re.findall(r"\S+", text)
+    co_dau = [bool(re.search(r"[,;:.!?…]$", w.strip("”\"’»)"))) for w in goc_tu]
+    a = [chuan(w[0]) for w in moc]
+    b = [chuan(w) for w in goc_tu]
+    anh_xa = {}
+    for kh in SequenceMatcher(None, a, b).get_matching_blocks():
+        for k in range(kh.size):
+            anh_xa[kh.a + k] = kh.b + k
+    khoang = [moc[i + 1][1] - moc[i][2] for i in range(len(moc) - 1)]
+    if len(khoang) < 4:
+        return []
+    import statistics
+    nen = max(statistics.median(khoang), 0.12)      # nhịp nghỉ nền của chính câu này
+    ra = []
+    for i, k in enumerate(khoang):
+        j = anh_xa.get(i)
+        if j is None or j >= len(co_dau) or co_dau[j]:
+            continue
+        if k >= nghi_min and k >= nen * boi:
+            ra.append(f"nghỉ {k:.2f}s sau “{goc_tu[j]}” (chỗ này không có dấu câu)")
+    return ra
 
 
 # ASR viết số bằng chữ số ("thứ 5", "2 cấp") còn sách viết bằng chữ ("thứ năm", "hai cấp");

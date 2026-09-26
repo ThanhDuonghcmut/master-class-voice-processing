@@ -21,7 +21,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from asr_kiem import dau_hieu, giong_nhau, nghe_nguoc
+from asr_kiem import dau_hieu, giong_nhau, ngat_nhip, nghe_nguoc
 from book_units import BUILD, ROOT, groups_in_order, iter_units, load_book
 
 OUT = BUILD / "asr_quet.csv"
@@ -34,8 +34,8 @@ THO_MAC_DINH = 8     # số tiến trình chạy song song
 def cham_diem(viec):
     """(id, nhóm, văn bản, đường dẫn wav) thành (id, nhóm, văn bản, ASR nghe ra, điểm)."""
     sid, group, text, wav = viec
-    nghe = nghe_nguoc(wav)
-    return sid, group, text, nghe, giong_nhau(nghe, text)
+    nghe, moc = nghe_nguoc(wav, moc_tu=True)
+    return sid, group, text, nghe, giong_nhau(nghe, text), moc
 
 
 def chon_nhom(book, argv):
@@ -79,17 +79,20 @@ def main(argv):
     ket_qua.sort(key=lambda r: r[4])
     with OUT.open("w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["id", "nhom", "truyen", "diem", "dau_hieu", "van_ban", "asr_nghe_ra"])
-        for sid, g, text, nghe, diem in ket_qua:
-            w.writerow([sid, g, ten.get(g, g), f"{diem:.3f}", dau_hieu(text, nghe), text, nghe])
+        w.writerow(["id", "nhom", "truyen", "diem", "dau_hieu", "ngat_nhip", "van_ban",
+                    "asr_nghe_ra", "moc_tu"])
+        for sid, g, text, nghe, diem, moc in ket_qua:
+            w.writerow([sid, g, ten.get(g, g), f"{diem:.3f}", dau_hieu(text, nghe),
+                        " | ".join(ngat_nhip(text, moc)), text, nghe, json.dumps(moc, ensure_ascii=False)])
     NGAN = 25   # câu quá ngắn (dòng ngày, nhãn "Chú thích:") điểm dao động mạnh, nhiều báo giả
-    nghi = [r for r in ket_qua if dau_hieu(r[2], r[3]) and len(r[2]) >= NGAN]
+    nghi = [r for r in ket_qua if (dau_hieu(r[2], r[3]) or ngat_nhip(r[2], r[5])) and len(r[2]) >= NGAN]
     print(f"\nXong trong {(time.time()-t0)/60:.0f} phút. Điểm giống trung bình "
           f"{sum(r[4] for r in ket_qua)/len(ket_qua):.3f}; {len(nghi)} câu có dấu hiệu đọc lặp "
           f"hoặc đọc thiếu ({len(nghi)/len(ket_qua)*100:.1f}%)")
     print(f"Chi tiết mọi câu: {OUT.relative_to(ROOT)}\n\nCâu cần nghe lại:")
-    for sid, g, text, nghe, diem in nghi:
-        print(f"  [{dau_hieu(text, nghe)}] điểm {diem:.2f}  {sid} [{ten.get(g, g)[:22]}]")
+    for sid, g, text, nghe, diem, moc in nghi:
+        co = dau_hieu(text, nghe) or " ; ".join(ngat_nhip(text, moc))
+        print(f"  [{co[:70]}] điểm {diem:.2f}  {sid} [{ten.get(g, g)[:22]}]")
         print(f"       sách : {text[:100]}")
         print(f"       nghe : {nghe[:100]}")
 
