@@ -3,3 +3,5 @@
 vieneu==3.8.1      # TTS tiếng Việt, ONNX CPU (kéo theo onnxruntime, soundfile, numpy)
 pymupdf==1.28.2    # trích text + font từ PDF
 lameenc==1.8.1     # mã hoá mp3 không cần ffmpeg
+faster-whisper==1.2.1  # ASR nghe ngược bản TTS để phát hiện câu đọc lặp (bước 06)
+python-docx==1.2.0     # sinh báo cáo Word từ số liệu thật

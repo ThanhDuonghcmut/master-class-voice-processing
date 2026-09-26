@@ -75,6 +75,15 @@ SOURCE_FIXES = {
     "trở về thành'phố": "trở về thành phố",           # dấu nháy lọt giữa từ
 }
 
+# Gộp/tách lại những câu mà quy tắc tách tự động cắt sai (lời dẫn "- X hỏi" bị coi là câu mới).
+# Câu mới mang mã "r000N" — tiền tố riêng để KHÔNG đụng dãy mã "s" tuần tự, vì mã "s" đã nằm
+# trong các file ghi nhận QA và bảng sửa; đổi dãy đó là mọi ghi nhận cũ trỏ sai câu.
+RESPLIT = [
+    {"thay": ["s001627", "s001628", "s001629"],
+     "bang": ["- Cậu ở đây à? - Ông đại úy ngạc nhiên hỏi",
+              "– Hoan hô! Cậu đã làm tròn nhiệm vụ!"]},
+]
+
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
 # tata = "bố" trong tiếng vùng Napoli (chú thích 31), xuất hiện 21 lần kể cả tiêu đề truyện;
 # VieNeu đọc "tata" thành "tót ta" hoặc nuốt còn "ta" → gạch nối ép đọc rõ hai âm tiết.
@@ -228,6 +237,32 @@ class Book:
                 "noterefs": [int(n) for n in NOTE_MARK.findall(raw)]}
 
 
+def apply_resplit(data):
+    """Thay các câu trong RESPLIT["thay"] bằng RESPLIT["bang"], mã mới r000N.
+    Ghi data["resplit"] = {mã cũ: mã mới đầu tiên} để ghi nhận QA cũ vẫn trỏ được."""
+    n, data["resplit"] = 0, {}
+    for rule in RESPLIT:
+        cu = rule["thay"]
+        for lv in data["levels"]:
+            for h in [lv, *lv["chapters"]]:
+                for p in h["paragraphs"]:
+                    ids = [s["id"] for s in p["sentences"]]
+                    if cu[0] not in ids:
+                        continue
+                    i = ids.index(cu[0])
+                    if ids[i:i + len(cu)] != cu:
+                        sys.exit(f"DỪNG: RESPLIT {cu} không còn liền nhau trong {p['id']} — sách đã đổi?")
+                    moi = []
+                    for raw in rule["bang"]:
+                        n += 1
+                        moi.append({"id": f"r{n:04d}", "raw": raw, "speech": speech_of(raw),
+                                    "noterefs": [int(x) for x in NOTE_MARK.findall(raw)]})
+                    p["sentences"][i:i + len(cu)] = moi
+                    data["resplit"].update({sid: moi[0]["id"] for sid in cu})
+                    print(f"Tách lại: {' + '.join(cu)} thành {' + '.join(m['id'] for m in moi)}")
+                    break
+
+
 def apply_speech_fixes(data):
     """Đọc sua_cach_doc.csv; dòng có cột speech → thay bản đọc của câu có id đó.
     id đánh tuần tự nên chỉ ổn định khi quy tắc tách câu không đổi: id không tìm thấy → dừng."""
@@ -249,7 +284,7 @@ def apply_speech_fixes(data):
     applied, unknown = 0, []
     with FIXES_CSV.open(encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
-            sid = row["id"].strip()
+            sid = data.get("resplit", {}).get(row["id"].strip(), row["id"].strip())
             if sid not in by_id:
                 unknown.append(sid)
             elif row.get("speech", "").strip():
@@ -285,6 +320,7 @@ def main():
         book.end_page()
 
     data = book.finalize()
+    apply_resplit(data)
     apply_speech_fixes(data)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
