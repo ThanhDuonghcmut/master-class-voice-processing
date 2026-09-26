@@ -43,7 +43,10 @@ def chon_nhom(book, argv):
     timing = json.loads((BUILD / "timing.json").read_text(encoding="utf-8"))
     order = [g for g in groups_in_order(book) if g in timing]
     if "--phan" not in argv:
-        return [g for g in argv if not g.startswith("--")] or order
+        bo = {"--tho", "--phan"}
+        ten = [a for i, a in enumerate(argv)
+               if not a.startswith("--") and (i == 0 or argv[i - 1] not in bo)]
+        return ten or order
     n = int(argv[argv.index("--phan") + 1])
     tong = sum(timing[g]["duration"] for g in order)
     phan, acc = [], 0.0
