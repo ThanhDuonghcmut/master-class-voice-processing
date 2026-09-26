@@ -76,7 +76,9 @@ SOURCE_FIXES = {
 }
 
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
-SPEECH_FIXES = {}
+# tata = "bố" trong tiếng vùng Napoli (chú thích 31), xuất hiện 21 lần kể cả tiêu đề truyện;
+# VieNeu đọc "tata" thành "tót ta" hoặc nuốt còn "ta" → gạch nối ép đọc rõ hai âm tiết.
+SPEECH_FIXES = {"tata": "ta-ta", "Tata": "Ta-ta"}
 
 
 def line_kind(line):
@@ -235,6 +237,7 @@ def apply_speech_fixes(data):
     by_id = {}
     for lv in data["levels"]:
         for h in [lv, *lv["chapters"]]:
+            by_id[h["id"]] = h              # tiêu đề tháng/truyện cũng sửa được bản đọc
             if h.get("dateline"):
                 by_id[h["dateline"]["id"]] = h["dateline"]
             for p in h["paragraphs"]:
