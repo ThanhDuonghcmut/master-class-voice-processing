@@ -17,84 +17,25 @@ import re
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor
-from difflib import SequenceMatcher
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+from asr_kiem import dau_hieu, giong_nhau, nghe_nguoc
 from book_units import BUILD, ROOT, groups_in_order, iter_units, load_book
 
 OUT = BUILD / "asr_quet.csv"
-ASR_MODEL = "small"
 NGUONG = 0.90        # dưới mức này thì đưa vào danh sách nghi vấn
 # Mỗi tiến trình nạp một bản mô hình (khoảng 0,5 GB RAM). Đã thử cách nạp một bản rồi chia cho
 # nhiều luồng qua num_workers của ctranslate2: chậm hơn 5 lần (0,3 câu/giây so với 1,8), vì phần
 # tiền xử lý của faster-whisper chạy trong Python nên bị GIL chặn, num_workers chỉ giúp phần C++.
 THO_MAC_DINH = 8     # số tiến trình chạy song song
-LUONG_CPU = 2        # luồng CPU cho mỗi tiến trình
-
-_asr = None
-
-
-def nap_mo_hinh():
-    global _asr
-    if _asr is None:
-        from faster_whisper import WhisperModel
-        _asr = WhisperModel(ASR_MODEL, device="cpu", compute_type="int8", cpu_threads=LUONG_CPU)
-    return _asr
-
-
-# ASR viết số bằng chữ số ("thứ 5", "2 cấp") còn sách viết bằng chữ ("thứ năm", "hai cấp");
-# quy về một dạng để khỏi báo lỗi giả.
-SO = {"không": "0", "một": "1", "mốt": "1", "hai": "2", "ba": "3", "bốn": "4", "tư": "4",
-      "năm": "5", "lăm": "5", "sáu": "6", "bảy": "7", "tám": "8", "chín": "9", "mười": "10"}
-
-
-def chuan(t):
-    t = " ".join(re.sub(r"[^\w\s]", " ", t.lower()).split())
-    return " ".join(SO.get(w, w) for w in t.split())
-
-
-def so_lan_lap(tu, n):
-    """Số lần một cụm n từ lặp lại NGAY SAU chính nó (đi đi / đi đi / đi đi)."""
-    dem = 0
-    for i in range(len(tu) - 2 * n + 1):
-        if tu[i:i + n] == tu[i + n:i + 2 * n]:
-            dem += 1
-    return dem
-
-
-def bo_thanh(w):
-    import unicodedata
-    d = unicodedata.normalize("NFD", w)
-    return unicodedata.normalize("NFC", "".join(c for c in d if c not in "\u0300\u0301\u0303\u0309\u0323"))
-
-
-def dau_hieu(text, nghe):
-    """Dấu hiệu lỗi đọc, không phụ thuộc việc ASR nghe sai tên riêng:
-    - "lặp": trong bản đọc có cụm lặp liên tiếp nhiều hơn trong văn bản gốc
-    - "thiếu": bản đọc ngắn hơn văn bản gốc đáng kể
-    Đếm trên dạng đã bỏ dấu thanh, vì ASR hay nghe từ láy thành từ lặp ("chầm chậm" thành
-    "chậm chậm"); bỏ dấu thì cả hai đều là một cặp giống nhau nên không báo nhầm.
-    Trả về chuỗi rỗng nếu không thấy dấu hiệu nào."""
-    a = [bo_thanh(w) for w in chuan(nghe).split()]
-    b = [bo_thanh(w) for w in chuan(text).split()]
-    for n in (1, 2, 3, 4):
-        if so_lan_lap(a, n) > so_lan_lap(b, n):
-            return f"lặp cụm {n} từ"
-    ti = len(a) / max(len(b), 1)
-    if ti < 0.85:
-        return f"thiếu {(1 - ti) * 100:.0f}% số từ"
-    return ""
-
 
 def cham_diem(viec):
     """(id, nhóm, văn bản, đường dẫn wav) thành (id, nhóm, văn bản, ASR nghe ra, điểm)."""
     sid, group, text, wav = viec
-    segs, _ = nap_mo_hinh().transcribe(wav, language="vi", beam_size=5)
-    nghe = " ".join(s.text.strip() for s in segs)
-    diem = SequenceMatcher(None, chuan(nghe), chuan(text)).ratio()
-    return sid, group, text, nghe, diem
+    nghe = nghe_nguoc(wav)
+    return sid, group, text, nghe, giong_nhau(nghe, text)
 
 
 def chon_nhom(book, argv):

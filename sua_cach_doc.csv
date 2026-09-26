@@ -28,7 +28,10 @@ s003548,,,"[GiaGia] Lỗi đọc lặp từ 'người ở Ý Ý' nhìn chính t�
 s003608,,,"[GiaGia] Sai chính tả chữ 'đường' nên khiến giọng đọc bị lập/sai — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
 s003622,,xong-2026-09-26,[GiaGia] Chữ mẹ ơi đọc lố một lần thành ba lần nhưng xét ngữ cảnh vẫn OK :))
 s003678,,xong-2026-09-26,[GiaGia] Chữ này lập 3 lần thay vì 2
+s003958,,xong-2026-09-26,[ASR] đọc lặp “nhưng những”
+s004101,"Con không rời mẹ nữa đâu, mẹ con ta sẽ cùng nhau trở về. Trên tàu, con sẽ luôn luôn ở cạnh mẹ, và không một ai có thể bắt con rời khỏi mẹ được nữa, không bao giờ! Không bao giờ!",xong-2026-09-26,"[ASR] đọc lặp “không bao giờ” ba lần; ngoài ra ngắt sai, “trên tàu con” đọc liền | tách câu trong bản đọc để bỏ ngắt sai ở “trên tàu con” và chặn lặp “không bao giờ”"
 s004264,,xong-2026-09-26,[GiaGia] Lặp 3 lần đi đi thay vì 2
 s004278,,xong-2026-09-26,[GiaGia] Lặp tiếp 3 lần thay vì 2 từ 'nhanh lên'
 s004387,,xong-2026-09-26,[GiaGia] 'luôn luôn ở cạnh cháu' lập lại 2 lần
 s004414,,xong-2026-09-26,[GiaGia] Lập 3 lần chữ 'không' thay vì 2 lần
+s005030,,xong-2026-09-26,[ASR] đọc lặp “lớp một trên” hai lần

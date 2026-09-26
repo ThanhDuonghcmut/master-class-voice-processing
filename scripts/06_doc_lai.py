@@ -32,32 +32,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from book_units import BUILD, ROOT, iter_units, load_book
 
-_asr = None
-
-
-def nghe_nguoc(path):
-    """Trả về văn bản ASR nghe được từ file wav, hoặc None nếu không có faster-whisper."""
-    global _asr
-    if _asr is None:
-        try:
-            from faster_whisper import WhisperModel
-            _asr = WhisperModel(ASR_MODEL, device="cpu", compute_type="int8")
-        except Exception as e:
-            print(f"(không dùng được ASR: {e}; chấm điểm bằng thời lượng)")
-            _asr = False
-    if not _asr:
-        return None
-    segs, _info = _asr.transcribe(str(path), language="vi", beam_size=5)
-    return " ".join(s.text.strip() for s in segs)
-
-
-def giong_nhau(a, b):
-    """Độ giống giữa ASR và văn bản gốc, bỏ dấu câu và chữ hoa."""
-    import re
-    from difflib import SequenceMatcher
-    chuan = lambda t: re.sub(r"[^\w\s]", " ", t.lower())
-    chuan = lambda t, _c=chuan: " ".join(_c(t).split())
-    return SequenceMatcher(None, chuan(a), chuan(b)).ratio()
+from asr_kiem import dau_hieu, giong_nhau, nghe_nguoc
 
 WAV_DIR, BACKUP = BUILD / "wav", BUILD / "doc_lai_cu"
 TAM = BUILD / "_doc_lai_tam.wav"
@@ -66,8 +41,7 @@ VOICE = "Đức Trí"
 SR = 48_000
 SEC_PER_CHAR = 0.081     # đo trên cả sách: 439k ký tự → 9,4 h giọng đọc
 LAN_MAC_DINH = 5
-ASR_MODEL = "small"      # tiny/base nghe sai nhiều ở tiếng Việt; small đủ để đếm cụm lặp
-DU_TOT = 0.93            # bản hiện tại khớp ASR tới mức này thì khỏi đọc lại
+DU_TOT = 0.93            # điểm giống tối thiểu để coi là đạt (kèm điều kiện không có dấu hiệu lặp)
 
 
 def ids_from_csv():
@@ -120,33 +94,39 @@ def main(argv):
         # Chấm điểm bản đang có trước: đủ tốt thì khỏi đọc lại
         nghe_cu = nghe_nguoc(wav) if wav.exists() else None
         if nghe_cu is not None:
-            diem_cu = giong_nhau(nghe_cu, u.text)
-            if diem_cu >= DU_TOT:
-                print(f"{sid} [{u.group}] bản hiện tại đã khớp ASR {diem_cu:.2f} — giữ nguyên")
+            diem_cu, co_loi_cu = giong_nhau(nghe_cu, u.text), dau_hieu(u.text, nghe_cu)
+            if diem_cu >= DU_TOT and not co_loi_cu:
+                print(f"{sid} [{u.group}] bản hiện tại đạt (điểm {diem_cu:.2f}, không thấy lặp/thiếu)")
                 print(f"   nghe ra: {nghe_cu[:95]}")
                 continue
+            if co_loi_cu:
+                print(f"{sid} [{u.group}] bản hiện tại: {co_loi_cu} (điểm {diem_cu:.2f}) — đọc lại")
         else:
-            diem_cu = -abs(cu - expect)          # không có ASR: điểm = âm sai lệch thời lượng
+            diem_cu, co_loi_cu = -abs(cu - expect), ""   # không có ASR: chấm bằng sai lệch thời lượng
 
         lan_doc = [tts.infer(u.text, voice=VOICE) for _ in range(lan)]
         durs = [len(a) / SR for a in lan_doc]
-        diem = []
+        diem, co_loi = [], []
         for i, a in enumerate(lan_doc):
             sf.write(TAM, np.asarray(a, dtype=np.float32), SR, subtype="PCM_16")
-            nghe = nghe_nguoc(TAM)
+            nghe = nghe_nguoc(TAM) if nghe_cu is not None else None
             diem.append(giong_nhau(nghe, u.text) if nghe is not None else -abs(durs[i] - expect))
-        best = max(range(lan), key=lambda i: diem[i])
-        if wav.exists() and diem_cu >= diem[best]:
-            print(f"{sid} [{u.group}] giữ bản cũ (điểm {diem_cu:.2f} ≥ tốt nhất trong {lan} lần "
-                  f"{diem[best]:.2f})")
+            co_loi.append(dau_hieu(u.text, nghe) if nghe is not None else "")
+        # ưu tiên bản KHÔNG có dấu hiệu lặp/thiếu, trong đó chọn bản điểm cao nhất
+        best = max(range(lan), key=lambda i: (not co_loi[i], diem[i]))
+        tot_hon = (not co_loi[best], diem[best]) > (not co_loi_cu, diem_cu)
+        if wav.exists() and not tot_hon:
+            print(f"{sid} [{u.group}] giữ bản cũ ({lan} lần đọc lại không bản nào tốt hơn: "
+                  f"điểm tốt nhất {diem[best]:.2f}{', vẫn ' + co_loi[best] if co_loi[best] else ''})")
             continue
         if wav.exists():
             shutil.copy(wav, BACKUP / f"{sid}.wav")
         wav.parent.mkdir(parents=True, exist_ok=True)
         sf.write(wav, np.asarray(lan_doc[best], dtype=np.float32), SR, subtype="PCM_16")
         wav.with_suffix(".txt").write_text(u.text, encoding="utf-8")
-        print(f"{sid} [{u.group}] cũ {cu:5.1f}s (điểm {diem_cu:.2f}) → mới {durs[best]:5.1f}s "
-              f"(điểm {diem[best]:.2f}; {lan} lần: {', '.join('%.2f' % x for x in diem)})")
+        print(f"{sid} [{u.group}] cũ {cu:5.1f}s (điểm {diem_cu:.2f}{', ' + co_loi_cu if co_loi_cu else ''}) "
+              f"→ mới {durs[best]:5.1f}s (điểm {diem[best]:.2f}; {lan} lần: "
+              f"{', '.join('%.2f' % x for x in diem)})")
         print(f"   {u.text[:95]}")
     if not argv:
         mark_done(set(ids))
