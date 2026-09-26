@@ -8,6 +8,7 @@ Hai chỉ số:
 """
 import re
 import unicodedata
+from pathlib import Path
 from difflib import SequenceMatcher
 
 ASR_MODEL = "small"      # tiny/base nghe sai nhiều ở tiếng Việt
@@ -32,12 +33,29 @@ def nghe_nguoc(path):
 # ASR viết số bằng chữ số ("thứ 5", "2 cấp") còn sách viết bằng chữ ("thứ năm", "hai cấp");
 # quy về một dạng để khỏi báo lỗi giả.
 SO = {"không": "0", "một": "1", "mốt": "1", "hai": "2", "ba": "3", "bốn": "4", "tư": "4",
-      "năm": "5", "lăm": "5", "sáu": "6", "bảy": "7", "tám": "8", "chín": "9", "mười": "10"}
+      "năm": "5", "lăm": "5", "sáu": "6", "bảy": "7", "tám": "8", "chín": "9", "mười": "10",
+      "giờ": "h", "mét": "m", "ki-lô-mét": "km"}   # ASR viết tắt đơn vị: "năm giờ" thành "5h"
 
 
 def chuan(t):
     t = " ".join(re.sub(r"[^\w\s]", " ", t.lower()).split())
-    return " ".join(SO.get(w, w) for w in t.split())
+    t = " ".join(SO.get(w, w) for w in t.split())
+    return re.sub(r"\b(\d+) (h|m|km)\b", r"\1\2", t)   # "5 h" và "5h" là một
+
+
+def bo_so(tu):
+    """Bỏ mọi token số — ASR viết "hai mươi bảy" thành "27", đếm từ sẽ lệch dù đọc đúng."""
+    return [w for w in tu if not re.fullmatch(r"[\d.,]+(h|m|km)?|mươi|trăm|nghìn|ngàn|triệu|tỷ", w)]
+
+
+def _tu_dien_am_tiet():
+    global _AM_TIET
+    try:
+        return _AM_TIET
+    except NameError:
+        f = Path(__file__).with_name("data") / "am_tiet_tieng_viet.txt"
+        _AM_TIET = {l.strip().lower() for l in f.open(encoding="utf-8-sig") if l.strip()} if f.exists() else set()
+        return _AM_TIET
 
 
 def so_lan_lap(tu, n):
@@ -55,6 +73,37 @@ def bo_thanh(w):
     return unicodedata.normalize("NFC", "".join(c for c in d if c not in "\u0300\u0301\u0303\u0309\u0323"))
 
 
+def ten_rieng(text):
+    """Tên riêng và từ nước ngoài: viết hoa giữa câu, hoặc không phải âm tiết tiếng Việt
+    (senor, nonna, capataz) — ASR nghe những từ này thành hai tiếng rời nên hay báo lặp giả."""
+    ten = {m.group(1).lower() for m in re.finditer(r"(?<!^)(?<![.!?“\"…]\s)\b([A-ZÀ-ỸĐ][\wà-ỹ]+)", text)}
+    am = _tu_dien_am_tiet()
+    if am:
+        ten |= {w for w in chuan(text).split() if w.isalpha() and w not in am}
+    return ten
+
+
+def lap_do_tach_ten(text, nghe, cum):
+    """True nếu cụm lặp trong bản ASR thực ra là một TÊN RIÊNG bị ASR tách làm hai từ giống nhau
+    ("Giorgio" nghe thành "gio gio", "senor" thành "xe nơ", "xổ số" thành "số số").
+    Nhận ra bằng cách: ngay chỗ đó văn bản gốc có một từ chứa cụm ấy, hoặc là tên riêng."""
+    ten = ten_rieng(text)
+    goc = chuan(text).split()
+    c = cum.split()[0]
+    for w in goc:
+        if w in ten and (c in w or w.startswith(c[:2])):
+            return True
+    return False
+
+
+def cum_lap_dau(tu, n):
+    """Cụm n từ đầu tiên bị lặp liên tiếp, để ghi rõ máy nghi cụm nào."""
+    for i in range(len(tu) - 2 * n + 1):
+        if tu[i:i + n] == tu[i + n:i + 2 * n]:
+            return " ".join(tu[i:i + n])
+    return ""
+
+
 def dau_hieu(text, nghe):
     """Dấu hiệu lỗi đọc, không phụ thuộc việc ASR nghe sai tên riêng:
     - "lặp": trong bản đọc có cụm lặp liên tiếp nhiều hơn trong văn bản gốc
@@ -66,8 +115,11 @@ def dau_hieu(text, nghe):
     b = [bo_thanh(w) for w in chuan(text).split()]
     for n in (1, 2, 3, 4):
         if so_lan_lap(a, n) > so_lan_lap(b, n):
-            return f"lặp cụm {n} từ"
-    ti = len(a) / max(len(b), 1)
+            cum = cum_lap_dau(a, n)
+            if n == 1 and cum and lap_do_tach_ten(text, nghe, cum):
+                continue          # ASR tách tên riêng, không phải TTS đọc lặp
+            return f"lặp cụm {n} từ" + (f" “{cum}”" if cum else "")
+    ti = len(bo_so(a)) / max(len(bo_so(b)), 1)
     if ti < 0.85:
         return f"thiếu {(1 - ti) * 100:.0f}% số từ"
     return ""
@@ -92,6 +144,37 @@ def so_lan_lap(tu, n):
     return dem
 
 
+def ten_rieng(text):
+    """Tên riêng và từ nước ngoài: viết hoa giữa câu, hoặc không phải âm tiết tiếng Việt
+    (senor, nonna, capataz) — ASR nghe những từ này thành hai tiếng rời nên hay báo lặp giả."""
+    ten = {m.group(1).lower() for m in re.finditer(r"(?<!^)(?<![.!?“\"…]\s)\b([A-ZÀ-ỸĐ][\wà-ỹ]+)", text)}
+    am = _tu_dien_am_tiet()
+    if am:
+        ten |= {w for w in chuan(text).split() if w.isalpha() and w not in am}
+    return ten
+
+
+def lap_do_tach_ten(text, nghe, cum):
+    """True nếu cụm lặp trong bản ASR thực ra là một TÊN RIÊNG bị ASR tách làm hai từ giống nhau
+    ("Giorgio" nghe thành "gio gio", "senor" thành "xe nơ", "xổ số" thành "số số").
+    Nhận ra bằng cách: ngay chỗ đó văn bản gốc có một từ chứa cụm ấy, hoặc là tên riêng."""
+    ten = ten_rieng(text)
+    goc = chuan(text).split()
+    c = cum.split()[0]
+    for w in goc:
+        if w in ten and (c in w or w.startswith(c[:2])):
+            return True
+    return False
+
+
+def cum_lap_dau(tu, n):
+    """Cụm n từ đầu tiên bị lặp liên tiếp, để ghi rõ máy nghi cụm nào."""
+    for i in range(len(tu) - 2 * n + 1):
+        if tu[i:i + n] == tu[i + n:i + 2 * n]:
+            return " ".join(tu[i:i + n])
+    return ""
+
+
 def dau_hieu(text, nghe):
     """Dấu hiệu lỗi đọc, không phụ thuộc việc ASR nghe sai tên riêng:
     - "lặp": trong bản đọc có cụm lặp liên tiếp nhiều hơn trong văn bản gốc
@@ -103,8 +186,11 @@ def dau_hieu(text, nghe):
     b = [bo_thanh(w) for w in chuan(text).split()]
     for n in (1, 2, 3, 4):
         if so_lan_lap(a, n) > so_lan_lap(b, n):
-            return f"lặp cụm {n} từ"
-    ti = len(a) / max(len(b), 1)
+            cum = cum_lap_dau(a, n)
+            if n == 1 and cum and lap_do_tach_ten(text, nghe, cum):
+                continue          # ASR tách tên riêng, không phải TTS đọc lặp
+            return f"lặp cụm {n} từ" + (f" “{cum}”" if cum else "")
+    ti = len(bo_so(a)) / max(len(bo_so(b)), 1)
     if ti < 0.85:
         return f"thiếu {(1 - ti) * 100:.0f}% số từ"
     return ""
