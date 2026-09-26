@@ -38,8 +38,17 @@ def nghe_nguoc(path, moc_tu=False):
 
 
 def ngat_nhip(text, moc, nghi_min=0.45, boi=1.8):
-    """Dò chỗ NGẮT SAI: nghỉ dài ở giữa câu mà chỗ đó không có dấu câu trong bản đọc
-    ("Thầy giáo | mới ngay từ sáng").
+    """KHÔNG DÙNG để báo lỗi — giữ lại vì kết quả vẫn ghi ra file cho ai muốn xem.
+
+    Ý định ban đầu: dò chỗ ngắt sai bằng cách tìm nghỉ dài ở chỗ không có dấu câu
+    ("Thầy giáo | mới ngay từ sáng"). Kiểm bằng tai trên ba chỗ bị báo nặng nhất thì hỏng cả ba:
+      - Chỗ báo "nghỉ 1,16 giây" thực tế KHÔNG có khoảng nghỉ nào. Mốc thời gian của Whisper là
+        ước lượng theo attention, không phải đo thật, nên lệch hàng trăm mili giây quanh tên riêng
+        và số — đúng những chỗ hay bị báo.
+      - Hai chỗ còn lại nghỉ đúng ngữ pháp: tiếng Việt ngắt được sau "rằng", sau mệnh đề phụ,
+        những chỗ không hề có dấu câu.
+    Muốn làm đúng thì cần mốc thời gian từ forced alignment (dóng hàng âm với văn bản gốc), không
+    phải từ ASR, và cần luật ngắt nhịp tiếng Việt chứ không chỉ dựa vào dấu câu.
 
     Hai điều đã học khi hiệu chỉnh:
       - Không xét "đọc liền qua dấu phẩy": tiếng Việt đọc liền qua dấu phẩy là bình thường,

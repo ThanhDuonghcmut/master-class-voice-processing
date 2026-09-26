@@ -88,13 +88,15 @@ def main(argv):
             w.writerow([sid, g, ten.get(g, g), f"{diem:.3f}", dau_hieu(text, nghe),
                         " | ".join(ngat_nhip(text, moc)), text, nghe, json.dumps(moc, ensure_ascii=False)])
     NGAN = 25   # câu quá ngắn (dòng ngày, nhãn "Chú thích:") điểm dao động mạnh, nhiều báo giả
-    nghi = [r for r in ket_qua if (dau_hieu(r[2], r[3]) or ngat_nhip(r[2], r[5])) and len(r[2]) >= NGAN]
+    # Chỉ dùng dấu hiệu lặp/thiếu. Cột ngắt nhịp vẫn ghi ra file để tham khảo nhưng KHÔNG dùng để
+    # báo động: xem ghi chú trong asr_kiem.ngat_nhip.
+    nghi = [r for r in ket_qua if dau_hieu(r[2], r[3]) and len(r[2]) >= NGAN]
     print(f"\nXong trong {(time.time()-t0)/60:.0f} phút. Điểm giống trung bình "
           f"{sum(r[4] for r in ket_qua)/len(ket_qua):.3f}; {len(nghi)} câu có dấu hiệu đọc lặp "
           f"hoặc đọc thiếu ({len(nghi)/len(ket_qua)*100:.1f}%)")
     print(f"Chi tiết mọi câu: {OUT.relative_to(ROOT)}\n\nCâu cần nghe lại:")
     for sid, g, text, nghe, diem, moc in nghi:
-        co = dau_hieu(text, nghe) or " ; ".join(ngat_nhip(text, moc))
+        co = dau_hieu(text, nghe)
         print(f"  [{co[:70]}] điểm {diem:.2f}  {sid} [{ten.get(g, g)[:22]}]")
         print(f"       sách : {text[:100]}")
         print(f"       nghe : {nghe[:100]}")
