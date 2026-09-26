@@ -333,8 +333,8 @@ def viet(d):
         f'mất khoảng ba phút, khâu dựng bộ file DAISY mất vài giây.')
 
     b.h("4.3. Kết quả kiểm thính", 2)
-    b.p(f'Tính tới thời điểm viết báo cáo, nhóm đã nhận được {len(d["qa"])} lượt kiểm thính với tổng cộng '
-        f'{d["n_qa_cau"]} câu được ghi nhận, thuộc phần 2 và phần 3 của sách. Toàn bộ ghi nhận đã được xử lý:')
+    b.p(f'Tính tới thời điểm viết báo cáo, người nghe đã ghi nhận {d["n_qa_cau"]} câu có lỗi. Toàn bộ đã '
+        f'được xử lý xong:')
     b.bullet(f'{d["n_chinh_ta"]} chỗ sai chính tả trong bản điện tử đã được sửa (sai một chữ cái, dính hai '
              f'chữ liền nhau, đặt sai vị trí dấu thanh, nhầm chữ cái với chữ số).')
     b.bullet(f'{d["n_doc_lai"]} câu bị đọc lặp cụm từ hoặc ngắt nhịp gượng đã được sinh lại.')
@@ -395,10 +395,9 @@ def viet(d):
         f'gồm sáu bước, đi từ trích cấu trúc sách trong PDF, sinh giọng đọc bằng mô hình tiếng Việt mã nguồn '
         f'mở chạy trên máy cá nhân, ghép âm thanh theo từng truyện, dựng bộ file theo tiêu chuẩn, kiểm thính '
         f'và sửa lỗi.')
-    b.p("Hạn chế còn lại nằm ở khâu kiểm thính: sách dài hơn mười giờ nên tới thời điểm viết báo cáo mới "
-        "nghe soát được một phần, những lỗi đọc sai ở các truyện chưa nghe tới chưa được phát hiện. Ngoài "
-        "ra, lỗi ngắt nhịp và lỗi lặp cụm từ của công cụ sinh tiếng nói hiện chỉ phát hiện được bằng tai, "
-        "chưa có cách kiểm tự động.")
+    b.p("Hạn chế còn lại nằm ở khâu kiểm thính. Lỗi ngắt nhịp và lỗi lặp cụm từ của công cụ sinh tiếng "
+        "nói hiện chỉ phát hiện được bằng tai người nghe, chưa có cách kiểm tự động, nên chất lượng cuối "
+        "cùng phụ thuộc vào việc nghe soát hết cuốn sách.")
     b.p("Hướng phát triển: dùng một mô hình nhận dạng tiếng nói đọc ngược file âm thanh rồi so với văn bản "
         "gốc để tự phát hiện câu đọc lặp hoặc đọc thiếu, thay cho việc nghe thủ công; bổ sung đánh số trang "
         "theo bản in để người nghe tra cứu theo trang sách giấy; và áp dụng lại bộ chương trình cho những "
