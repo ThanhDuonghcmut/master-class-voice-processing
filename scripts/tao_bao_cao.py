@@ -340,7 +340,6 @@ def viet(d):
         ["soundfile, NumPy", "Đọc và ghi tín hiệu âm thanh, cắt khoảng lặng, ghép các câu"],
         ["lameenc", "Mã hoá MP3 ngay trong Python, không phụ thuộc công cụ cài ngoài"],
         ["faster-whisper", "Nhận dạng tiếng nói để nghe ngược bản đọc, tìm câu đọc lặp hoặc đọc thiếu"],
-        ["python-docx", "Sinh file báo cáo này từ số liệu thật của dự án"],
     ], widths=[4, 12])
     b.p("Danh sách 6.775 âm tiết tiếng Việt lấy từ đồ án trước của môn học được dùng để dò lỗi chính tả "
         "trong bản điện tử.")
