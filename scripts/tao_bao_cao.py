@@ -21,6 +21,11 @@ from docx.shared import Cm, Pt, RGBColor
 from book_units import BUILD, ROOT, iter_units, load_book, load_metadata
 
 OUT = ROOT / "out" / "Bao_cao.docx"
+
+
+def so(n):
+    """12765 → "12.765" (chỉ định dạng số, không đụng dấu câu trong câu văn)."""
+    return f"{n:,}".replace(",", ".")
 TRONG = "[CHỜ ĐIỀN]"
 
 
@@ -41,7 +46,9 @@ def so_lieu():
         rows = list(csv.DictReader(f.open(encoding="utf-8")))
         quet[f.stem] = rows
     src = (ROOT / "scripts" / "01_extract_pdf.py").read_text(encoding="utf-8")
-    n_chinh_ta = src.count('": "', src.index("SOURCE_FIXES"), src.index("SPEECH_FIXES"))
+    n_chinh_ta = src.count('": "', src.index("SOURCE_FIXES"), src.index("# Câu mà TTS đọc thừa"))
+    n_manh = src.count('": [', src.index("DOC_THEO_MANH"), src.index("# Chỉ đổi BẢN ĐỌC"))
+    n_resplit = src.count('{"thay":', src.index("RESPLIT = ["), src.index("# Câu mà TTS đọc thừa"))
     tong_giay = sum(v["duration"] for v in timing.values())
     tieng_doc = sum(r["sec"] for r in tts if r.get("sec"))
     return {
@@ -61,7 +68,8 @@ def so_lieu():
         "n_sua_doc": sum(1 for r in fixes if r.get("speech")),
         "n_qa_cau": sum(len(v) for v in qa.values()),
         "so_file_sach": len(list((ROOT / "out" / meta["slug"]).iterdir())),
-        "quet_cau": sum(len(v) for v in quet.values()),
+        "quet_cau": len(quet.get("asr_quet_casach", [])) or max((len(v) for v in quet.values()), default=0),
+        "n_manh": n_manh, "n_resplit": n_resplit,
     }
 
 
@@ -299,10 +307,16 @@ def viet(d):
              "lấy mẫu ngẫu nhiên nên mỗi lần đọc cho ra một bản khác nhau; chương trình đọc lại câu đó "
              "nhiều lần, dùng nhận dạng tiếng nói chấm điểm từng bản, ưu tiên bản không còn dấu hiệu lặp "
              "rồi mới xét mức giống, và chỉ thay khi bản mới tốt hơn bản đang có.")
-    b.p("Với một số câu, đọc lại bao nhiêu lần cũng lặp vì chính cấu trúc câu gây ra, chẳng hạn câu kết "
-        "thúc bằng “không bao giờ, không bao giờ!”. Khi đó nhóm sửa bản đọc để phá thế lặp, ví dụ tách "
-        "thành hai câu ngắn bằng dấu chấm than, còn chữ hiển thị trong sách vẫn giữ nguyên văn. Cách này "
-        "cũng dùng để sửa chỗ ngắt nhịp sai.")
+    b.p("Có những câu đọc lại mười lần vẫn lặp, vì chính cấu trúc câu gây ra: cụm lặp nằm ở cuối một "
+        "câu dài, như câu kết thúc bằng “không bao giờ, không bao giờ!” hay “phải đến nơi, phải đến "
+        "nơi!”. Đổi dấu câu trong bản đọc cũng không hết. Cách chữa hiệu quả là chia câu thành mảnh ở "
+        "khâu sinh tiếng nói: mỗi mảnh đọc riêng rồi nối lại thành một đoạn âm thanh duy nhất, với "
+        "khoảng nghỉ ngắn hơn khoảng nghỉ giữa hai câu. Cách chia này chỉ tồn tại khi đọc; trong sách "
+        "vẫn là một câu với một mã định danh như cũ, nên các ghi nhận kiểm thính trước đó vẫn trỏ đúng.")
+    b.p("Một số ít câu lại là lỗi của bản điện tử: bản ebook thiếu dấu chấm nên hai câu của bản in dính "
+        "làm một, đọc lên nghe rất gượng. Những câu này được tách thành hai câu thật, và câu mới nhận mã "
+        "gắn với mã câu gốc thay vì đánh số tuần tự, để việc thêm một chỗ tách không làm xê dịch mã của "
+        "những câu khác.")
     b.p("Riêng lỗi chính tả của bản điện tử thì sửa thẳng vào bảng sửa nguồn, đổi cả chữ hiển thị lẫn "
         "cách đọc, vì bản in gốc không sai những chỗ đó.")
     b.p("Sau khi sửa, sách được dựng lại rồi nén kèm file chứa mã băm SHA-256 theo đúng cấu trúc thư mục "
@@ -343,10 +357,10 @@ def viet(d):
     b.bang(["Chỉ tiêu", "Kết quả"], [
         ["Tổng thời lượng", d["dong_ho"]],
         ["Số truyện và phần", f'{d["book"]["stats"]["chapters"]} truyện, thuộc 10 tháng và phần Mở đầu'],
-        ["Số câu có đồng bộ văn bản và âm thanh", f'{d["so_clip"]:,} câu'.replace(",", ".")],
-        ["Số đoạn văn", f'{d["book"]["stats"]["paragraphs"]:,}'.replace(",", ".")],
+        ["Số câu có đồng bộ văn bản và âm thanh", f'{so(d["so_clip"])} câu'],
+        ["Số đoạn văn", so(d["book"]["stats"]["paragraphs"])],
         ["Số chú thích", f'{d["book"]["stats"]["notes"]} chú thích, đọc ngay tại chỗ tham chiếu'],
-        ["Số từ", f'{d["so_tu"]:,} từ'.replace(",", ".")],
+        ["Số từ", f'{so(d["so_tu"])} từ'],
         ["Số file âm thanh", f'{d["so_mp3"]} file MP3, mỗi truyện một file'],
         ["Dung lượng âm thanh", f'{d["dung_luong"]:.0f} MB'],
         ["Tổng số file trong sách", f'{d["so_file_sach"]} file'],
@@ -368,11 +382,15 @@ def viet(d):
     b.bullet(f'{d["n_doc_lai"]} câu bị đọc lặp cụm từ hoặc ngắt nhịp gượng đã được sinh lại.')
     b.bullet(f'{d["n_sua_doc"]} câu được chỉnh cách đọc bằng cách thêm dấu ngắt vào bản đọc, giữ nguyên chữ '
              f'trong sách.')
-    b.p(f'Bước kiểm tự động quét {d["quet_cau"]:,} câu, chỉ ra những câu có dấu hiệu đọc lặp hoặc đọc '
-        f'thiếu để người nghe kiểm lại. Trong số câu máy nghi ở phần đã đối chiếu, ba câu đúng là lỗi '
-        f'thật và đều là lỗi mà người nghe đã bỏ sót; các trường hợp còn lại là mô hình nhận dạng nghe '
-        f'sai tên riêng nước ngoài. Sau khi bổ sung các luật lọc báo nhầm, số câu máy đưa ra để kiểm lại '
-        f'giảm còn khoảng ba phần nghìn tổng số câu.'.replace(",", "."))
+    b.bullet(f'{d["n_manh"]} câu có cụm lặp ở cuối, đọc lại nhiều lần vẫn lặp, được chia mảnh khi sinh '
+             f'tiếng nói rồi nối lại thành một đoạn âm thanh.')
+    b.bullet(f'{d["n_resplit"]} câu bị dính do bản điện tử thiếu dấu chấm, được tách lại thành hai câu.')
+    b.p(f'Bước kiểm tự động quét toàn bộ {so(d["quet_cau"])} câu của sách trong khoảng một giờ máy, '
+        f'chỉ ra những câu có dấu hiệu đọc lặp hoặc đọc thiếu để người nghe kiểm lại. Người nghe xác nhận '
+        f'một phần trong đó là lỗi thật và nhóm đã sửa; đáng chú ý là có những câu tai người nghe qua '
+        f'không nhận ra nhưng máy phát hiện được. Phần còn lại là mô hình nhận dạng nghe sai tên riêng '
+        f'nước ngoài, chứ giọng đọc không sai. Sau khi bổ sung các luật lọc báo nhầm, số câu máy đưa ra '
+        f'để kiểm lại còn khoảng sáu phần nghìn tổng số câu.')
     b.p("Một phát hiện đáng chú ý từ khâu kiểm thính: nhiều lỗi chính tả của bản điện tử là từ viết đúng "
         "chính tả nhưng sai ngữ cảnh, ví dụ “tốt bụng” thành “tất bụng”, “gập người” thành “gặp người”. "
         "Chương trình dò tự động bằng từ điển âm tiết không bắt được những trường hợp này vì cả hai từ đều "
@@ -413,6 +431,10 @@ def viet(d):
          "thừa một cụm chỉ làm mức giống giảm vài phần trăm",
          "Dò dấu hiệu trực tiếp là cụm từ lặp liên tiếp và số từ bị thiếu, thay cho việc đặt ngưỡng trên "
          "mức giống"],
+        ["Mã định danh câu đánh số tuần tự nên mọi thay đổi ở quy tắc tách câu đều làm xê dịch mã của "
+         "các câu phía sau, khiến ghi nhận kiểm thính cũ trỏ sai chỗ",
+         "Câu sinh thêm nhận mã gắn với mã câu gốc; những câu chỉ hỏng cách đọc thì không tách trong "
+         "sách mà chỉ chia mảnh khi sinh tiếng nói, giữ nguyên mã cũ"],
         ["Mô hình nhận dạng nghe sai tên riêng nước ngoài, tách một tên thành hai tiếng giống nhau nên "
          "bị báo nhầm là đọc lặp",
          "Bỏ qua cụm lặp trùng với tên riêng hoặc từ không phải âm tiết tiếng Việt; đếm trên dạng đã bỏ "
@@ -440,9 +462,14 @@ def viet(d):
     b.p("Hạn chế còn lại nằm ở khâu kiểm thính. Bước kiểm tự động bắt được lỗi đọc lặp và đọc thiếu, "
         "nhưng lỗi ngắt nhịp gượng và giọng đọc đơ thì vẫn phải nghe bằng tai, nên chất lượng cuối cùng "
         "phụ thuộc vào việc nghe soát hết cuốn sách.")
-    b.p("Hướng phát triển: mở rộng bước kiểm tự động để bắt thêm lỗi ngắt nhịp và lỗi đọc sai tên riêng, "
-        "là hai loại hiện vẫn phải nghe bằng tai; bổ sung đánh số trang theo bản in để người nghe tra cứu "
-        "theo trang sách giấy; và áp dụng lại bộ chương trình cho những cuốn sách khác có cùng dạng nguồn.")
+    b.p("Nhóm có thử mở rộng bước kiểm tự động sang lỗi ngắt nhịp, bằng cách lấy mốc thời gian từng từ "
+        "của mô hình nhận dạng rồi tìm khoảng nghỉ dài ở chỗ không có dấu câu. Cách này không dùng được: "
+        "mốc thời gian đó là ước lượng chứ không phải đo, sai lệch mạnh quanh tên riêng và chữ số, và "
+        "tiếng Việt vốn ngắt được ở nhiều chỗ không có dấu câu. Muốn làm đúng thì cần dóng hàng âm thanh "
+        "với văn bản gốc thay vì dựa vào bản nhận dạng.")
+    b.p("Hướng phát triển: dóng hàng âm thanh với văn bản để kiểm được cả nhịp đọc; bổ sung đánh số trang "
+        "theo bản in để người nghe tra cứu theo trang sách giấy; và áp dụng lại bộ chương trình cho những "
+        "cuốn sách khác có cùng dạng nguồn.")
     return b
 
 
