@@ -17,6 +17,8 @@ Xong thì cột doc_lai tự thành "xong-<ngày>" để lần chạy sau không
     .venv/bin/python scripts/06_doc_lai.py                 # mọi id có doc_lai="x"
     .venv/bin/python scripts/06_doc_lai.py s004387 s003622 # id cụ thể
     .venv/bin/python scripts/06_doc_lai.py --lan 8 s004387 # đọc 8 lần thay vì 5
+    .venv/bin/python scripts/06_doc_lai.py --ep s000136    # đọc lại dù ASR chấm đạt (lỗi ngắt nhịp,
+                                                          # giọng đơ — những thứ ASR không thấy)
 """
 import csv
 import os
@@ -70,6 +72,8 @@ def mark_done(ids):
 
 
 def main(argv):
+    ep = "--ep" in argv          # ép đọc lại, không tin kết quả chấm của ASR
+    argv = [a for a in argv if a != "--ep"]
     lan = LAN_MAC_DINH
     if "--lan" in argv:
         i = argv.index("--lan")
@@ -96,7 +100,7 @@ def main(argv):
         if nghe_cu is not None:
             diem_cu = giong_nhau(nghe_cu, u.text)
             co_loi_cu = dau_hieu(u.text, nghe_cu) or lap_o_duoi(u.text, nghe_duoi(wav))
-            if diem_cu >= DU_TOT and not co_loi_cu:
+            if diem_cu >= DU_TOT and not co_loi_cu and not ep:
                 print(f"{sid} [{u.group}] bản hiện tại đạt (điểm {diem_cu:.2f}, không thấy lặp/thiếu)")
                 print(f"   nghe ra: {nghe_cu[:95]}")
                 continue
@@ -128,7 +132,7 @@ def main(argv):
         dat = [i for i in range(lan) if diem[i] >= san] or list(range(lan))
         best = max(dat, key=lambda i: (not co_loi[i], diem[i]))
         tot_hon = (not co_loi[best], diem[best]) > (not co_loi_cu, diem_cu)
-        if wav.exists() and not tot_hon:
+        if wav.exists() and not tot_hon and not ep:
             print(f"{sid} [{u.group}] giữ bản cũ ({lan} lần đọc lại không bản nào tốt hơn: "
                   f"điểm tốt nhất {diem[best]:.2f}{', vẫn ' + co_loi[best] if co_loi[best] else ''})")
             continue

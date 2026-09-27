@@ -13,7 +13,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXES = ROOT / "sua_cach_doc.csv"
-FIELDS = ["id", "speech", "ghi_chu"]
+FIELDS = ["id", "speech", "doc_lai", "ghi_chu"]   # giữ đủ cột, thiếu là mất dấu "đã đọc lại"
 
 
 def main(paths):
@@ -32,7 +32,8 @@ def main(paths):
                     if tag not in rows[sid]["ghi_chu"]:
                         rows[sid]["ghi_chu"] = (rows[sid]["ghi_chu"] + " | " + tag).strip(" |")
                 else:
-                    rows[sid] = {"id": sid, "speech": "", "ghi_chu": f"{tag} — câu gốc: {r.get('cau', '')}"}
+                    rows[sid] = {"id": sid, "speech": "", "doc_lai": "",
+                                 "ghi_chu": f"{tag} — câu gốc: {r.get('cau', '')}"}
     with FIXES.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()

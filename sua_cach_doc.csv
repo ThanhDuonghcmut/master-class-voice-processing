@@ -1,47 +1,54 @@
 id,speech,doc_lai,ghi_chu
 lv2-048,,,[Triết] hình như đọc sai là tót ta
+s000136,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] bị ngắt ở Những tấm lòng cao /(ngắt hơi)/ cả không phải chỉ là... — câu gốc: Và vì thế mà Những tấm lòng cao cả không phải chỉ là một cuốn sách riêng dành cho thiếu nhi, mà lại còn là một cuốn sách viết cho cô giáo, thầy giáo cho bố mẹ học sinh và cho những người lớn trong xã hội nữa."
+s000148,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] ngắt sau chữ thâu, đêm — câu gốc: Con còn phải giúp đỡ bố mẹ nữa: Giulio bốn tháng trời thức thâu đêm viết thuê giúp bố, nhưng giấu bố, dù phải cay đắng chịu đựng những lời trách cứ bất công vì hiểu lầm của bố."
+s000166,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] lặp lại cuối câu 2 lần: khiến người xem nô nức kéo đến ... tới cuối — câu gốc: Thấy một gánh xiếc, đàn bà trẻ con lao động nghệ thuật vất vả gian khổ, nguy hiểm, ông Bottini viết báo ca tụng cậu bé làm xiếc, khiến người xem nô nức kéo đến chật rạp, giúp cho gánh xiếc."
+s000192,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] phải là: tháng sáu, trẻ ngồi học chứ ko phải tháng sáu trẻ, ngồi học mà. hay bên bờ sông cuội sỏi cháy bỏng chứ không tách cuội, sỏi cháy bỏng — câu gốc: Tháng sáu trẻ ngồi học mà như sắp lên cơn điên, bà Bottini nhắc con là có những trẻ phải làm lụng ngoài đồng dưới mặt trời đổ lửa, hay bên bờ sông cuội sỏi cháy bỏng, hay trong xưởng thủy tinh mặt lúc nào cũng cúi sát lò lửa, phải bắt đầu ngày lao động rất sớm, và chẳng bao giờ được nghỉ lễ, nghỉ hè."
+s000196,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] ngắt sai: Những tấm lòng cao, cả — câu gốc: Tất nhiên đó là những chỗ yếu rõ ràng của cuốn sách, nhưng thời gian - người đánh giá công bằng và đúng đắn nhất - đã công nhận Những tấm lòng cao cả là tác phẩm có giá trị, không những về nội dung mà cả về văn chương nữa."
+s000202,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] ngắt câu sai: học đi học, laị — câu gốc: “Rạng đông vừa hừng sáng” và “chiếc tàu đã biến mất rồi”, chỉ đơn giản thế thôi, nhưng dù kết cục của truyện người đọc đã đoán biết trước rồi, đọc đến những câu cuối như thế ít ai có thể để lòng dửng dưng, và không ít người tuy đã học đi học lại nhiều lần vẫn khó mà cầm được nước mắt."
+s000204,,xong-2026-09-27,"[qa_duong_2026-09-27_121118] ngắt sai: nổi tiếng hơn, cả — câu gốc: Nhiều đoạn trong Những tấm lòng cao cả đã làm người đọc xúc động như thế, lại có những đoạn rất thuyết phục vì lời văn hùng hồn, nhất là những bức thư bố mẹ viết cho con; mà nhiều bức đã được trích vào sách giáo khoa ở nhiều nước, nổi tiếng hơn cả là bức thư về Trường học."
 s000255,"Thầy giáo mới, ngay từ sáng hôm nay đã làm cho tất cả chúng tôi đều rất thích.",,"VieNeu nghỉ sai sau ""giáo"" (hiểu ""mới"" là trạng từ); thêm phẩy ép gom cụm"
-s001069,,xong-2026-09-26,[nghe] đọc “cứu với” 4 lần
-s001377,,xong-2026-09-26,[nghe] lặp “mỗi vé hai xu” 2 lần
+s001069,,,[nghe] đọc “cứu với” 4 lần
+s001377,,,[nghe] lặp “mỗi vé hai xu” 2 lần
 s001556,,,[Triết] gập người lại chứ nhỉ? — đã sửa chính tả ở SOURCE_FIXES
 s001579,,,[Triết] cậu bé — đã sửa chính tả ở SOURCE_FIXES
-s001584,,xong-2026-09-27,[nghe] đọc “phải đến nơi” 3 lần
-s001589,,xong-2026-09-26,"[Triết] ""đạn bắn như điên cuồng"" bị dừng lại sau đạn bắn"
-s001593,,xong-2026-09-26,"[Triết] bị lặp lại ""đầu hàng, đe dọa giết chết họ"""
+s001584,,,[nghe] đọc “phải đến nơi” 3 lần
+s001589,,,"[Triết] ""đạn bắn như điên cuồng"" bị dừng lại sau đạn bắn"
+s001593,,,"[Triết] bị lặp lại ""đầu hàng, đe dọa giết chết họ"""
 s001619,,,[Triết] dãy — đã sửa chính tả ở SOURCE_FIXES
-s001628,,xong-2026-09-24,[Triết] hình như bị cắt dòng sai
+s001628,,,[Triết] hình như bị cắt dòng sai
 s001673,,,"[Triết] bao lơn của con tàu"" đúng hong ta"
 s001677,,,"[Triết] ""thành phố"" bị dính lại — đã sửa chính tả ở SOURCE_FIXES"
 s001696,,,[Triết] lụ ồn bị dính chữ — đã sửa chính tả ở SOURCE_FIXES
 s001751,,,"[Triết] ""rồi"" bị sai chính tả — đã sửa chính tả ở SOURCE_FIXES"
 s001809,,,[Triết] cậu bé tất bụng ??? — đã sửa chính tả ở SOURCE_FIXES
-s001884,,xong-2026-09-27,[nghe] đọc “chết rồi” 3 lần
-s001932,,xong-2026-09-26,"[Triết] bị lặp lại ""đã vui lòng cho tôi được hôn tay"""
+s001884,,,[nghe] đọc “chết rồi” 3 lần
+s001932,,,"[Triết] bị lặp lại ""đã vui lòng cho tôi được hôn tay"""
 s001956,,,[Triết] ta-ta nhưng đọc chỉ là ta
 s001971,,,[Triết] có vẻ từ tata này đọc cũng như trên
 s002003,,,[Triết] chổ này cũng có tên tata chắc đọc như trên
 s002008,,,[Triết] Có tên Tata
 s002014,,,[Triết] cũng có tata
-s002055,,xong-2026-09-26,[Triết] ngắt ở chổ chữ ánh hơi kì xíu
-s002122,,xong-2026-09-26,[Triết] trong voice có 3 từ tạm biệt
-s002451,,xong-2026-09-27,[nghe] đọc “những người thợ mộc” 3 lần
-s002596,,xong-2026-09-27,[nghe] đọc “vĩnh biệt” 3 lần
-s002794,,xong-2026-09-27,[nghe] đọc “chẳng có gì” 3 lần
-s002859,,x,"[nghe] đọc “bà ạ” thành “bà ạ, ạ”"
-s003142,,xong-2026-09-27,[nghe] đọc “rất vui lòng” 3 lần
-s003190,,xong-2026-09-27,[nghe] đọc “xin bà” 2 lần
-s003288,,xong-2026-09-26,[GiaGia] Vế đầu đoạn 'tất của thời thơ ấu ấy' giọng đọc bị khựng vài nhịp ngắn và tương đối cứng
+s002055,,,[Triết] ngắt ở chổ chữ ánh hơi kì xíu
+s002122,,,[Triết] trong voice có 3 từ tạm biệt
+s002451,,,[nghe] đọc “những người thợ mộc” 3 lần
+s002596,,,[nghe] đọc “vĩnh biệt” 3 lần
+s002794,,,[nghe] đọc “chẳng có gì” 3 lần
+s002859,,,"[nghe] đọc “bà ạ” thành “bà ạ, ạ”"
+s003142,,,[nghe] đọc “rất vui lòng” 3 lần
+s003190,,,[nghe] đọc “xin bà” 2 lần
+s003288,,,[GiaGia] Vế đầu đoạn 'tất của thời thơ ấu ấy' giọng đọc bị khựng vài nhịp ngắn và tương đối cứng
 s003333,,,"[GiaGia] Sai chính tả: 'cổng chmh' --> 'cổng chính' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
 s003390,,,"[GiaGia] Dính chử 'đểđược' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
-s003441,,xong-2026-09-26,"[GiaGia] Giọng nói nị lặp lại từ phần 'đã tưởng, rồi tội nghiệp' rồi nói thêm lại 'đã tưởng'"
+s003441,,,"[GiaGia] Giọng nói nị lặp lại từ phần 'đã tưởng, rồi tội nghiệp' rồi nói thêm lại 'đã tưởng'"
 s003548,,,"[GiaGia] Lỗi đọc lặp từ 'người ở Ý Ý' nhìn chính tả trong sách gốc bị sai 'ngườí' chữ ngườ-í' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
 s003608,,,"[GiaGia] Sai chính tả chữ 'đường' nên khiến giọng đọc bị lập/sai — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
-s003622,,xong-2026-09-26,[GiaGia] Chữ mẹ ơi đọc lố một lần thành ba lần nhưng xét ngữ cảnh vẫn OK :))
-s003678,,xong-2026-09-26,[GiaGia] Chữ này lập 3 lần thay vì 2
-s003958,,xong-2026-09-26,[ASR] đọc lặp “nhưng những”
-s004101,"Con không rời mẹ nữa đâu, mẹ con ta sẽ cùng nhau trở về. Trên tàu, con sẽ luôn luôn ở cạnh mẹ, và không một ai có thể bắt con rời khỏi mẹ được nữa, không bao giờ! Không bao giờ!",xong-2026-09-26,"[ASR] đọc lặp “không bao giờ” ba lần; ngoài ra ngắt sai, “trên tàu con” đọc liền | tách câu trong bản đọc để bỏ ngắt sai ở “trên tàu con” và chặn lặp “không bao giờ”"
-s004264,,xong-2026-09-26,[GiaGia] Lặp 3 lần đi đi thay vì 2
-s004278,,xong-2026-09-26,[GiaGia] Lặp tiếp 3 lần thay vì 2 từ 'nhanh lên'
-s004387,,xong-2026-09-26,[GiaGia] 'luôn luôn ở cạnh cháu' lập lại 2 lần
-s004414,,xong-2026-09-26,[GiaGia] Lập 3 lần chữ 'không' thay vì 2 lần
-s005030,,xong-2026-09-26,[ASR] đọc lặp “lớp một trên” hai lần
+s003622,,,[GiaGia] Chữ mẹ ơi đọc lố một lần thành ba lần nhưng xét ngữ cảnh vẫn OK :))
+s003678,,,[GiaGia] Chữ này lập 3 lần thay vì 2
+s003958,,,[ASR] đọc lặp “nhưng những”
+s004101,"Con không rời mẹ nữa đâu, mẹ con ta sẽ cùng nhau trở về. Trên tàu, con sẽ luôn luôn ở cạnh mẹ, và không một ai có thể bắt con rời khỏi mẹ được nữa, không bao giờ! Không bao giờ!",,"[ASR] đọc lặp “không bao giờ” ba lần; ngoài ra ngắt sai, “trên tàu con” đọc liền | tách câu trong bản đọc để bỏ ngắt sai ở “trên tàu con” và chặn lặp “không bao giờ”"
+s004264,,,[GiaGia] Lặp 3 lần đi đi thay vì 2
+s004278,,,[GiaGia] Lặp tiếp 3 lần thay vì 2 từ 'nhanh lên'
+s004387,,,[GiaGia] 'luôn luôn ở cạnh cháu' lập lại 2 lần
+s004414,,,[GiaGia] Lập 3 lần chữ 'không' thay vì 2 lần
+s005030,,,[ASR] đọc lặp “lớp một trên” hai lần
