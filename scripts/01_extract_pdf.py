@@ -98,6 +98,9 @@ RESPLIT = [
      "bang": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ và "
               "bỗng kêu lên:",
               "“Ông ấy chết rồi, chết rồi!”"]},
+    {"thay": ["s003142"],
+     "bang": ["Cụ Crosetti hỏi xem bố làm nghề gì; biết rõ, cụ kêu lên:",
+              "“Tôi rất vui lòng, rất vui lòng!”…"]},
     {"thay": ["s001069"],
      "bang": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
               "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
