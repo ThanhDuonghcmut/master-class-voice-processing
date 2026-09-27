@@ -103,118 +103,65 @@ RESPLIT = [
 # vậy và đổi dấu câu cũng không hết. Chia câu thành mảnh CHỈ Ở KHÂU SINH TIẾNG NÓI: mỗi mảnh đọc
 # riêng rồi nối lại thành một clip duy nhất. Sách vẫn là một câu, mã câu không đổi, nên khác hẳn
 # RESPLIT ở trên (dành cho câu mà bản in vốn là hai câu).
-# Hai bảng dưới cùng cơ chế (chia câu thành mảnh CHỈ Ở KHÂU SINH TIẾNG NÓI: mỗi mảnh đọc riêng
-# rồi nối lại thành một clip, sách vẫn là một câu và mã câu không đổi) nhưng chữa hai lỗi khác nhau.
+# Hai bảng dưới cùng cơ chế: chia câu thành mảnh CHỈ Ở KHÂU SINH TIẾNG NÓI (mỗi mảnh đọc riêng
+# rồi nối lại thành một clip; sách vẫn là một câu, mã câu không đổi), nhưng chữa hai lỗi khác nhau.
+#
+# Mỗi mục chỉ ghi MỐC CẮT — vài chữ cuối của mảnh — chứ không chép lại cả câu. Chép lại câu dài
+# bằng tay là nguồn sai nguy hiểm nhất ở đây: một chữ lệch là sách nói đọc khác sách chữ, mà không
+# ai phát hiện được. Ghi mốc thì câu luôn được cắt từ chính bản đọc.
 
-# 1. TTS đọc thừa một lần cụm ở cuối câu ("…phải đến nơi, phải đến nơi!"), đọc lại mười lần vẫn
-#    vậy và đổi dấu câu cũng không hết.
+# 1. TTS đọc thừa một lần cụm ở cuối câu ("…phải đến nơi, phải đến nơi!"), đọc lại mười lần vẫn vậy.
 MANH_LAP_CUOI = {
-    "s001584": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi "
-                "bàn tay nắm chặt, - chết cũng được nếu cần,",
-                "nhưng phải đến nơi, phải đến nơi!”"],
-    "s001884": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ "
-                "và bỗng kêu lên:", "“Ông ấy chết rồi, chết rồi!”"],
-    "s003142": ["Cụ Crosetti hỏi xem bố làm nghề gì; biết rõ, cụ kêu lên:",
-                "“Tôi rất vui lòng, rất vui lòng!”…"],
-    "s001069": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
-                "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
-                "“Cứu với! Cứu với!”"],
+    "s001069": ["bé đang kêu"],
+    "s001584": ["được nếu cần"],
+    "s001884": ["bỗng kêu lên"],
+    "s003142": ["cụ kêu lên"],
 }
 
-# 2. TTS ngắt nhịp sai giữa một cụm ("bản đồ nước Ý treo | ở tường", "Những tấm lòng cao | cả").
-#    Lỗi này chỉ phát hiện được bằng tai (xem cạm bẫy 13); chia mảnh đúng ranh giới ý thì chỗ nghỉ
-#    rơi vào nơi mong muốn.
+# 2. TTS ngắt nhịp sai giữa một cụm ("bản đồ nước Ý treo | ở tường"). Lỗi này chỉ phát hiện được
+#    bằng tai (cạm bẫy 13); cắt đúng ranh giới ý thì chỗ nghỉ rơi vào nơi mong muốn.
 MANH_NGAT_NHIP = {
-    "s000957": ["Nhỡ một đồng xu từ túi cậu rơi xuống gầm ghế, thì cậu ta có thể tìm suốt mấy giờ liền",
-                "cho kỳ được."],
-    "s000979": ["Đi qua phố Dora Grossa, chúng tôi trông thấy Stardi đang lấy chân đá những bạn",
-                "không may làm vướng nó."],
-    "s000985": ["Sau khi chạy một hồi trên đường cái",
-                "bỏ rất xa ông Votini đang đi thong thả ở đằng sau, chúng tôi dừng lại trước một cái "
-                "ghế đá, cạnh một cậu bé ăn mặc giản dị, có vẻ mệt, và đang ngồi nghỉ, đầu cúi xuống."],
-    "s000986": ["Một người lớn, cô lẽ là bố cậu bé, vừa đi đi lại lại",
-                "vừa đọc báo dưới bóng cây."],
-    "s000994": ["Anh chàng bên", "quay quay cái mũ dạ trắng đẹp của mình trên đầu ngón tay."],
-    "s001039": ["Vừa bước vào nhà",
-                "cậu đã bỏ cái mũ lưỡi trai bị tuyết làm ướt sũng, và đút vào túi, rồi bước tới với "
-                "cái dáng điệu chậm chạp của người thợ mệt nhọc, quay sang bên này lại sang bên kia "
-                "cái mặt tròn như quả táo, với cái mũi tẹt."],
-    "s001173": ["Ông tuổi đã cao và lao động quá sức lại càng làm ông già đi nhiều", "so với tuổi."],
-    "s001175": ["Sau cùng, ông nhận của một nhà xuất bản sách báo việc viết tên và địa chỉ của những "
-                "người mua sách, báo dài hạn", "lên những băng giấy để gửi đi."],
-    "s001189": ["Một đêm, chờ cho bố ngủ yên, cậu trở dậy, lặng lẽ mặc áo, rón rén mò vào phòng làm "
-                "việc của bố, thắp đèn lên, lại ngồi vào bàn giấy trước một chồng băng còn trắng nguyên",
-                "và bản danh sách người mua báo; rồi cậu bắt đầu viết, bắt chước y hệt nét chữ của bố."],
-    "s001206": ["Nửa đêm hôm sau", "Giulio lại dậy làm việc."],
-    "s001227": ["Và vừa nói, ông vừa lấy trong túi ra một gói kẹo ông đã mua",
-                "để cùng các con ăn mừng khoản tiền thu trội ấy."],
-    "s001237": ["Nhưng mệt nhọc chồng chất thêm vào mệt nhọc,",
-                "càng ngày cậu càng khó mà chống chọi nổi."],
-    "s001259": ["Điều quan trọng là giúp bố kiếm ăn và làm nhẹ bớt nỗi mệt nhọc",
-                "đang làm bố chết dần, chết mòn”."],
-    "s000538": ["Cậu có một con dao chuôi nạm xà cừ",
-                "cậu bắt được năm ngoái trên quảng trường Vũ khí; một hôm dùng dao, cậu bị khía một "
-                "nhát sâu vào ngón tay, nhưng trong lớp chẳng ai hay biết gì cả, và về nhà cậu cũng "
-                "chẳng nói một lời, để cho bố mẹ khỏi phải lo sợ."],
-    "s000576": ["Chúng tôi nghe cô kể chuyện thích quá",
-                "và em trai tôi đã vui vẻ nuốt một chén thuốc đắng cho vừa lòng cô Delcati."],
-    "s000585": ["Mùa hè chúng đem đến trường những con cánh cam bay vù vù, hay rơi vào lọ mực",
-                "lấm bê bết rồi bò lên các trang vở vạch những vạch mực đen ngòm."],
-    "s000600": ["Cứ sau hai năm trời hết lòng chăm nom những đứa trẻ mà mình thương yêu hết sức,",
-                "rồi phải xa chúng, không gặp lại nữa!"],
-    "s000819": ["Đội ky binh do một sĩ quan và một hạ sĩ chỉ huy; họ nhìn xa ra phía trước, im lặng,",
-                "sẵn sàng nhận ra ngay những bộ quân phục màu trắng của các đội tiền vệ quân thù xuất hiện."],
-    "s000825": ["Cậu mặc sơ mi và giữa hai tà áo", "lộ ra bộ ngực trần."],
-    "s000857": ["Chỉ phút chốc",
-                "cậu đã đến tận ngọn cây cao chót vót, đôi chân mất hút trong tán lá, nhưng để lộ cả "
-                "đầu và ngực."],
-    "s000862": ["Để nhìn cho rõ, cậu bé buông tay phải",
-                "đang vịn vào cành cây, đưa lên che trước mắt."],
-    "s000920": ["Khi các sĩ quan dẫn đầu tiểu đoàn trông thấy thi hài nhỏ bé",
-                "nằm dưới gốc cây tần bì, quấn trong lá cờ ba màu, thì họ tuốt gươm chào, và một "
-                "người trong bọn họ cúi xuống bờ suối gần đó, hái hoa rắc lên mình cậu bé."],
-    "s000934": ["Nghe mẹ bảo con ạ, đừng quen thói dửng dưng đi qua trước người nghèo khổ",
-                "ngửa tay xin mình giúp đỡ và hơn nữa trước một người mẹ xin một xu cho con mình."],
-    "s000939": ["Đối với mẹ",
-                "hình như lời cầu chúc ấy phải bảo vệ cho tất cả những người thân yêu của mẹ, và mẹ "
-                "về nhà càng vui lòng hơn và tự nhủ: “Người nghèo khổ này đã trả lại cho mình nhiều "
-                "hơn mình đã cho họ nhiều”."],
-    "s000338": ["Nói xong, thầy Perboni đứng lên và chỉ trên bản đồ nước Ý treo ở tường",
-                "cái điểm vẽ thành phố Reggio di Calabria."],
-    "s000345": ["Rồi ôm hôn cậu", "nồng nàn trên hai má!"],
-    "s000413": ["Đã một năm rồi",
-                "cô giáo mới lại đến đây, và tất cả mọi người trong nhà đều vui mừng đón tiếp cô."],
-    "s000421": ["Tôi tin chắc thế nào cô cũng đến nhà tôi, vì cô không bao giờ quên học trò cũ của "
-                "cô; cô nhớ tên học trò, và những ngày thi",
-                "cô đến thầy hiệu trưởng để xem họ được bao nhiêu điểm; cô còn đứng ngoài cửa phòng "
-                "thi chờ họ ra và bảo họ đem cho cô đọc những bài làm, để xem họ có tiến bộ không."],
-    "s000477": ["Con hãy hình dung trong trí tưởng tượng những học sinh ấy đang đi trên những con "
-                "đường ở nông thôn, trên những đường phố của các thành thị nhộn nhịp, dưới trời nắng gắt",
-                "hay dưới tuyết rơi, đi thuyền ở những xứ dọc ngang kinh rạch, đi ngựa qua những cánh "
-                "đồng rộng lớn, đi xe trượt trên mặt băng, qua các thung lũng và các đồi gò, qua rừng, "
-                "qua suối, trên những đường mòn hẻo lánh băng qua núi, đi một mình, đi từng đôi hay "
-                "từng tốp, thành hàng dài, tất cả đều cắp sách vở, mặc quần áo hàng nghìn kiểu, nói "
-                "nhiều thứ tiếng khác nhau, từ ngôi trường xa xôi nhất khuất nẻo trong tuyết của nước "
-                "Nga cho đến ngôi trường hẻo lánh nhất của đất Arabia núp dưới bóng cây cọ."],
-    "s000226": ["Tôi vui thích thấy lại căn phòng rộng ở tầng dưới",
-                "thông với bảy lớp học, mà suốt ba năm gần như ngày nào tôi cũng đi qua."],
-    "s000232": ["Tôi trông thấy thầy hiệu trưởng, mà bộ râu",
-                "hình như có bạc hơn năm ngoái một ít, đang bị vây giữa những bà mẹ khá phật ý vì "
-                "không còn chỗ để cho con họ vào học nữa."],
-    "s000241": ["Người thầy", "nhỏ nhắn đến nỗi làm cho chúng tôi cứ tưởng như là một người bạn."],
-    "s000283": ["Các con hãy tỏ ra cho thầy thấy", "là những đứa trẻ chân thành, dũng cảm."],
-    "s000136": ["Và vì thế mà Những tấm lòng cao cả",
-                "không phải chỉ là một cuốn sách riêng dành cho thiếu nhi, mà lại còn là một cuốn "
-                "sách viết cho cô giáo, thầy giáo cho bố mẹ học sinh và cho những người lớn trong "
-                "xã hội nữa."],
-    "s000192": ["Tháng sáu, trẻ ngồi học mà như sắp lên cơn điên,",
-                "bà Bottini nhắc con là có những trẻ phải làm lụng ngoài đồng dưới mặt trời đổ lửa, "
-                "hay bên bờ sông cuội sỏi cháy bỏng,",
-                "hay trong xưởng thủy tinh mặt lúc nào cũng cúi sát lò lửa, phải bắt đầu ngày lao "
-                "động rất sớm, và chẳng bao giờ được nghỉ lễ, nghỉ hè."],
+    "s000136": ["lòng cao cả"],
+    "s000192": ["lên cơn điên", "sỏi cháy bỏng"],
+    "s000226": ["ở tầng dưới"],
+    "s000232": ["mà bộ râu"],
+    "s000241": ["Người thầy"],
+    "s000283": ["cho thầy thấy"],
+    "s000338": ["treo ở tường"],
+    "s000345": ["ôm hôn cậu"],
+    "s000413": ["một năm rồi"],
+    "s000421": ["những ngày thi"],
+    "s000477": ["trời nắng gắt"],
+    "s000538": ["nạm xà cừ"],
+    "s000576": ["chuyện thích quá"],
+    "s000585": ["vào lọ mực"],
+    "s000600": ["yêu hết sức"],
+    "s000819": ["trước, im lặng"],
+    "s000825": ["hai tà áo"],
+    "s000857": ["Chỉ phút chốc"],
+    "s000862": ["buông tay phải"],
+    "s000920": ["hài nhỏ bé"],
+    "s000934": ["người nghèo khổ"],
+    "s000939": ["Đối với mẹ"],
+    "s000957": ["mấy giờ liền"],
+    "s000979": ["đá những bạn"],
+    "s000985": ["trên đường cái"],
+    "s000986": ["đi lại lại"],
+    "s000994": ["Anh chàng bên"],
+    "s001039": ["bước vào nhà"],
+    "s001173": ["già đi nhiều"],
+    "s001175": ["báo dài hạn"],
+    "s001189": ["còn trắng nguyên"],
+    "s001206": ["đêm hôm sau"],
+    "s001227": ["ông đã mua"],
+    "s001237": ["vào mệt nhọc"],
+    "s001259": ["nỗi mệt nhọc"],
 }
 
-DOC_THEO_MANH = {**MANH_LAP_CUOI, **MANH_NGAT_NHIP}
+MOC_CAT = {**MANH_LAP_CUOI, **MANH_NGAT_NHIP}
+
+# Vài câu cần thêm dấu phẩy ngay tại chỗ cắt để ép ngắt (dấu câu thuộc bản đọc, sách giữ nguyên).
+PHAY_TAI_MOC = {"s000192": "Tháng sáu"}
 
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
 # tata = "bố" trong tiếng vùng Napoli (chú thích 31), xuất hiện 21 lần kể cả tiêu đề truyện;
@@ -427,6 +374,22 @@ def apply_resplit(data):
                     break
 
 
+def cat_theo_moc(speech, mocs, sid):
+    """Cắt bản đọc thành mảnh ngay SAU mỗi mốc. Mốc không tìm thấy thì dừng — sách đã đổi."""
+    manh, con = [], speech
+    for mc in mocs:
+        k = con.find(mc)
+        if k < 0:
+            sys.exit(f"DỪNG: không thấy mốc cắt {mc!r} trong câu {sid}:\n  {speech}")
+        cat = k + len(mc)
+        while cat < len(con) and con[cat] in ",;:… ":   # nuốt dấu câu ngay sau mốc
+            cat += 1
+        manh.append(con[:cat].strip())
+        con = con[cat:].strip()
+    manh.append(con)
+    return manh
+
+
 def apply_manh(data):
     """Gắn danh sách mảnh vào câu, để bước sinh tiếng nói đọc từng mảnh rồi nối lại."""
     n = 0
@@ -434,20 +397,18 @@ def apply_manh(data):
         for h in [lv, *lv["chapters"]]:
             for p in h["paragraphs"]:
                 for s in p["sentences"]:
-                    if s["id"] in DOC_THEO_MANH:
-                        s["manh"] = DOC_THEO_MANH[s["id"]]
-                        # Ghép các mảnh lại phải đúng từng CHỮ so với bản đọc (dấu câu thì được
-                        # phép thêm bớt, vì chính nó ép chỗ ngắt); soạn sai một chữ là TTS đọc sai.
-                        chu = lambda t: " ".join(re.sub(r"[^\w\s]", " ", t.lower()).split())
-                        if chu(" ".join(s["manh"])) != chu(s["speech"]):
-                            sys.exit(f"DỪNG: mảnh của {s['id']} ghép lại không khớp bản đọc.\n"
-                                     f"  bản đọc  : {s['speech']}\n"
-                                     f"  ghép mảnh: {' '.join(s['manh'])}")
-                        n += 1
-    thieu = set(DOC_THEO_MANH) - {s["id"] for lv in data["levels"] for h in [lv, *lv["chapters"]]
-                                  for p in h["paragraphs"] for s in p["sentences"]}
+                    if s["id"] not in MOC_CAT:
+                        continue
+                    s["manh"] = cat_theo_moc(s["speech"], MOC_CAT[s["id"]], s["id"])
+                    if s["id"] in PHAY_TAI_MOC:     # thêm phẩy GIỮA mảnh để ép ngắt đúng chỗ
+                        cum = PHAY_TAI_MOC[s["id"]]
+                        if cum + "," not in s["manh"][0]:
+                            s["manh"][0] = s["manh"][0].replace(cum, cum + ",", 1)
+                    n += 1
+    thieu = set(MOC_CAT) - {s["id"] for lv in data["levels"] for h in [lv, *lv["chapters"]]
+                            for p in h["paragraphs"] for s in p["sentences"]}
     if thieu:
-        sys.exit(f"DỪNG: DOC_THEO_MANH có mã câu không tồn tại {sorted(thieu)}")
+        sys.exit(f"DỪNG: MOC_CAT có mã câu không tồn tại {sorted(thieu)}")
     print(f"Đọc theo mảnh: {n} câu")
 
 
