@@ -123,6 +123,7 @@ MANH_LAP_CUOI = {
 #    bằng tai (cạm bẫy 13); cắt đúng ranh giới ý thì chỗ nghỉ rơi vào nơi mong muốn.
 MANH_NGAT_NHIP = {
     "s001433": ["cậu hé môi nói thật"],
+    "s001467": ["một chiếc bắp cải to tướng", "rồi với hai xu bán bắp cải"],
     "s001469": ["Sung sướng làm sao", "với các bạn thân"],
     "s000136": ["lòng cao cả"],
     "s000192": ["lên cơn điên", "sỏi cháy bỏng"],
