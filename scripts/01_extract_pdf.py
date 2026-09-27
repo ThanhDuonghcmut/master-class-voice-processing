@@ -76,14 +76,20 @@ SOURCE_FIXES = {
 }
 
 # Gộp/tách lại những câu mà quy tắc tách tự động cắt sai (lời dẫn "- X hỏi" bị coi là câu mới).
-# Câu mới mang mã "r000N" — tiền tố riêng để KHÔNG đụng dãy mã "s" tuần tự, vì mã "s" đã nằm
-# trong các file ghi nhận QA và bảng sửa; đổi dãy đó là mọi ghi nhận cũ trỏ sai câu.
+# Câu mới mang mã "<mã câu gốc>r1", "<mã câu gốc>r2" — gắn với câu bị thay nên KHÔNG đụng dãy mã
+# "s" tuần tự (mã "s" đã nằm trong các file ghi nhận QA) và cũng không trôi khi thêm quy tắc mới
+# vào giữa danh sách; từng đánh số r0001, r0002… theo thứ tự và bị trôi đúng như vậy.
 RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
      "bang": ["- Cậu ở đây à? - Ông đại úy ngạc nhiên hỏi",
               "– Hoan hô! Cậu đã làm tròn nhiệm vụ!"]},
     # Lời kêu nằm cuối câu dài thì TTS đọc thành bốn lần dù đọc lại tám lần; tách riêng ra
     # câu ngắn thì đọc đúng hai lần.
+    # Bản ebook thiếu dấu chấm sau “của cụ” nên lời kể và lời thoại dính làm một câu dài, nghe rất gượng.
+    {"thay": ["s003123"],
+     "bang": ["- Thế thì, cho phép tôi, thưa ông… - và bước tới cụ ôm hôn bố, cái đầu bạc của cụ "
+              "Crosetti chỉ mới ngang vai người học trò thôi, và bố đưa môi hôn vào vầng trán tôn kính của cụ.",
+              "“Giờ, xin mời quá bước lại nhà”, cụ giáo nói."]},
     {"thay": ["s001069"],
      "bang": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
               "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
@@ -246,7 +252,7 @@ class Book:
 def apply_resplit(data):
     """Thay các câu trong RESPLIT["thay"] bằng RESPLIT["bang"], mã mới r000N.
     Ghi data["resplit"] = {mã cũ: mã mới đầu tiên} để ghi nhận QA cũ vẫn trỏ được."""
-    n, data["resplit"] = 0, {}
+    data["resplit"] = {}
     for rule in RESPLIT:
         cu = rule["thay"]
         for lv in data["levels"]:
@@ -259,9 +265,8 @@ def apply_resplit(data):
                     if ids[i:i + len(cu)] != cu:
                         sys.exit(f"DỪNG: RESPLIT {cu} không còn liền nhau trong {p['id']} — sách đã đổi?")
                     moi = []
-                    for raw in rule["bang"]:
-                        n += 1
-                        moi.append({"id": f"r{n:04d}", "raw": raw, "speech": speech_of(raw),
+                    for k, raw in enumerate(rule["bang"], 1):
+                        moi.append({"id": f"{cu[0]}r{k}", "raw": raw, "speech": speech_of(raw),
                                     "noterefs": [int(x) for x in NOTE_MARK.findall(raw)]})
                     p["sentences"][i:i + len(cu)] = moi
                     data["resplit"].update({sid: moi[0]["id"] for sid in cu})

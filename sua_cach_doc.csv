@@ -5,6 +5,7 @@ s001069,,xong-2026-09-26,[nghe] đọc “cứu với” 4 lần
 s001377,,xong-2026-09-26,[nghe] lặp “mỗi vé hai xu” 2 lần
 s001556,,,[Triết] gập người lại chứ nhỉ? — đã sửa chính tả ở SOURCE_FIXES
 s001579,,,[Triết] cậu bé — đã sửa chính tả ở SOURCE_FIXES
+s001584,,xong-2026-09-27,[nghe] đọc “phải đến nơi” 3 lần
 s001589,,xong-2026-09-26,"[Triết] ""đạn bắn như điên cuồng"" bị dừng lại sau đạn bắn"
 s001593,,xong-2026-09-26,"[Triết] bị lặp lại ""đầu hàng, đe dọa giết chết họ"""
 s001619,,,[Triết] dãy — đã sửa chính tả ở SOURCE_FIXES
@@ -14,6 +15,7 @@ s001677,,,"[Triết] ""thành phố"" bị dính lại — đã sửa chính t�
 s001696,,,[Triết] lụ ồn bị dính chữ — đã sửa chính tả ở SOURCE_FIXES
 s001751,,,"[Triết] ""rồi"" bị sai chính tả — đã sửa chính tả ở SOURCE_FIXES"
 s001809,,,[Triết] cậu bé tất bụng ??? — đã sửa chính tả ở SOURCE_FIXES
+s001884,,xong-2026-09-27,[nghe] đọc “chết rồi” 3 lần
 s001932,,xong-2026-09-26,"[Triết] bị lặp lại ""đã vui lòng cho tôi được hôn tay"""
 s001956,,,[Triết] ta-ta nhưng đọc chỉ là ta
 s001971,,,[Triết] có vẻ từ tata này đọc cũng như trên
@@ -22,6 +24,12 @@ s002008,,,[Triết] Có tên Tata
 s002014,,,[Triết] cũng có tata
 s002055,,xong-2026-09-26,[Triết] ngắt ở chổ chữ ánh hơi kì xíu
 s002122,,xong-2026-09-26,[Triết] trong voice có 3 từ tạm biệt
+s002451,,xong-2026-09-27,[nghe] đọc “những người thợ mộc” 3 lần
+s002596,,xong-2026-09-27,[nghe] đọc “vĩnh biệt” 3 lần
+s002794,,xong-2026-09-27,[nghe] đọc “chẳng có gì” 3 lần
+s002859,,x,"[nghe] đọc “bà ạ” thành “bà ạ, ạ”"
+s003142,,xong-2026-09-27,[nghe] đọc “rất vui lòng” 3 lần
+s003190,,xong-2026-09-27,[nghe] đọc “xin bà” 2 lần
 s003288,,xong-2026-09-26,[GiaGia] Vế đầu đoạn 'tất của thời thơ ấu ấy' giọng đọc bị khựng vài nhịp ngắn và tương đối cứng
 s003333,,,"[GiaGia] Sai chính tả: 'cổng chmh' --> 'cổng chính' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"
 s003390,,,"[GiaGia] Dính chử 'đểđược' — đã sửa ở SOURCE_FIXES (01_extract_pdf.py), không cần cột speech"

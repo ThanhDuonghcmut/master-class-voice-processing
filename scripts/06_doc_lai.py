@@ -112,8 +112,12 @@ def main(argv):
             nghe = nghe_nguoc(TAM) if nghe_cu is not None else None
             diem.append(giong_nhau(nghe, u.text) if nghe is not None else -abs(durs[i] - expect))
             co_loi.append(dau_hieu(u.text, nghe) if nghe is not None else "")
-        # ưu tiên bản KHÔNG có dấu hiệu lặp/thiếu, trong đó chọn bản điểm cao nhất
-        best = max(range(lan), key=lambda i: (not co_loi[i], diem[i]))
+        # Ưu tiên bản không có dấu hiệu lặp/thiếu, nhưng CHỈ trong số bản đạt điểm tối thiểu:
+        # bản đọc hỏng nặng cũng không có cụm lặp nào (ASR nghe ra khác hẳn), từng bị chọn nhầm
+        # một bản điểm 0,40 thay cho bản 0,89 đang lặp.
+        san = max(DU_TOT - 0.05, diem_cu - 0.02) if nghe_cu is not None else -9e9
+        dat = [i for i in range(lan) if diem[i] >= san] or list(range(lan))
+        best = max(dat, key=lambda i: (not co_loi[i], diem[i]))
         tot_hon = (not co_loi[best], diem[best]) > (not co_loi_cu, diem_cu)
         if wav.exists() and not tot_hon:
             print(f"{sid} [{u.group}] giữ bản cũ ({lan} lần đọc lại không bản nào tốt hơn: "
