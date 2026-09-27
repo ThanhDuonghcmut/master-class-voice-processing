@@ -65,6 +65,8 @@ SOURCE_FIXES = {
     "muốn khuyu, đầu gục": "muốn khuỵu, đầu gục",
     "chẳng có gì bất điệt": "chẳng có gì bất diệt",
     "một vờng hoa lớn": "một vòng hoa lớn",
+    # Ebook chép "những ngày buồn thảm nhất"; theo mạch câu phải là "nhưng ngày buồn thảm nhất"
+    "buồn thảm, những ngày buồn thảm nhất": "buồn thảm, nhưng ngày buồn thảm nhất",
     "De Amlcis": "De Amicis",          # OCR: i → l
     "DeAmicis rất": "De Amicis rất",   # dính hai chữ
     "Hà Lan (l874)": "Hà Lan (1874)",  # OCR: số 1 → chữ l, TTS đọc thành chữ cái
@@ -82,7 +84,8 @@ SOURCE_FIXES = {
 # Hai câu liền nhau vốn là MỘT câu trong sách nhưng bị tách nhầm (dấu chú thích [n] làm pymupdf
 # cắt block giữa chừng, ví dụ tên phố "Dora | Grossa"). Gộp lại, giữ mã của câu đầu để mã các câu
 # khác không trôi; mã câu sau được ánh xạ về câu đầu cho ghi nhận QA cũ.
-GOP_CAU = [("s000305", "s000306")]
+GOP_CAU = [("s000305", "s000306"),    # "đường phố Dora | Grossa"
+           ("s000695", "s000696")]    # "ông được tặng năm | 1866 khi đang ở trung đoàn…"
 
 RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
@@ -121,6 +124,33 @@ MANH_LAP_CUOI = {
 #    Lỗi này chỉ phát hiện được bằng tai (xem cạm bẫy 13); chia mảnh đúng ranh giới ý thì chỗ nghỉ
 #    rơi vào nơi mong muốn.
 MANH_NGAT_NHIP = {
+    "s000538": ["Cậu có một con dao chuôi nạm xà cừ",
+                "cậu bắt được năm ngoái trên quảng trường Vũ khí; một hôm dùng dao, cậu bị khía một "
+                "nhát sâu vào ngón tay, nhưng trong lớp chẳng ai hay biết gì cả, và về nhà cậu cũng "
+                "chẳng nói một lời, để cho bố mẹ khỏi phải lo sợ."],
+    "s000576": ["Chúng tôi nghe cô kể chuyện thích quá",
+                "và em trai tôi đã vui vẻ nuốt một chén thuốc đắng cho vừa lòng cô Delcati."],
+    "s000585": ["Mùa hè chúng đem đến trường những con cánh cam bay vù vù, hay rơi vào lọ mực",
+                "lấm bê bết rồi bò lên các trang vở vạch những vạch mực đen ngòm."],
+    "s000600": ["Cứ sau hai năm trời hết lòng chăm nom những đứa trẻ mà mình thương yêu hết sức,",
+                "rồi phải xa chúng, không gặp lại nữa!"],
+    "s000819": ["Đội ky binh do một sĩ quan và một hạ sĩ chỉ huy; họ nhìn xa ra phía trước, im lặng,",
+                "sẵn sàng nhận ra ngay những bộ quân phục màu trắng của các đội tiền vệ quân thù xuất hiện."],
+    "s000825": ["Cậu mặc sơ mi và giữa hai tà áo", "lộ ra bộ ngực trần."],
+    "s000857": ["Chỉ phút chốc",
+                "cậu đã đến tận ngọn cây cao chót vót, đôi chân mất hút trong tán lá, nhưng để lộ cả "
+                "đầu và ngực."],
+    "s000862": ["Để nhìn cho rõ, cậu bé buông tay phải",
+                "đang vịn vào cành cây, đưa lên che trước mắt."],
+    "s000920": ["Khi các sĩ quan dẫn đầu tiểu đoàn trông thấy thi hài nhỏ bé",
+                "nằm dưới gốc cây tần bì, quấn trong lá cờ ba màu, thì họ tuốt gươm chào, và một "
+                "người trong bọn họ cúi xuống bờ suối gần đó, hái hoa rắc lên mình cậu bé."],
+    "s000934": ["Nghe mẹ bảo con ạ, đừng quen thói dửng dưng đi qua trước người nghèo khổ",
+                "ngửa tay xin mình giúp đỡ và hơn nữa trước một người mẹ xin một xu cho con mình."],
+    "s000939": ["Đối với mẹ",
+                "hình như lời cầu chúc ấy phải bảo vệ cho tất cả những người thân yêu của mẹ, và mẹ "
+                "về nhà càng vui lòng hơn và tự nhủ: “Người nghèo khổ này đã trả lại cho mình nhiều "
+                "hơn mình đã cho họ nhiều”."],
     "s000338": ["Nói xong, thầy Perboni đứng lên và chỉ trên bản đồ nước Ý treo ở tường",
                 "cái điểm vẽ thành phố Reggio di Calabria."],
     "s000345": ["Rồi ôm hôn cậu", "nồng nàn trên hai má!"],
