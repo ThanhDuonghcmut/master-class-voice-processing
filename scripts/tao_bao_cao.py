@@ -292,28 +292,31 @@ def viet(d):
         "đưa người nghe kiểm lại từng câu.")
 
     b.h("2.6. Bước 6 – Sửa lỗi và đóng gói", 2)
-    b.p("Các file ghi nhận của mọi người được gộp thành một bảng sửa duy nhất, mỗi câu một dòng, giữ "
-        "nguyên ghi chú của từng người. Bảng này có hai cột điều khiển:")
-    b.bullet("Cột bản đọc: điền cách đọc mới cho câu, còn chữ hiển thị trong sách vẫn giữ nguyên văn. "
-             "Dùng khi công cụ đọc sai mà văn bản không sai, ví dụ đọc số thập phân theo kiểu phân cách "
-             "hàng nghìn, hoặc ngắt nhịp sai ở câu có cấu trúc nhập nhằng.")
-    b.bullet("Cột đọc lại: đánh dấu những câu bị lặp cụm từ hoặc ngắt nhịp gượng. Công cụ sinh tiếng nói "
-             "lấy mẫu ngẫu nhiên nên mỗi lần đọc cho ra một bản khác nhau; chương trình đọc lại câu đó "
-             "nhiều lần, cho mô hình nhận dạng nghe lại từng bản rồi chấm điểm, ưu tiên bản không còn "
-             "dấu hiệu lặp, sau đó mới xét mức giống với văn bản gốc, và chỉ thay khi bản mới tốt hơn "
-             "bản đang có.")
-    b.p("Có những câu đọc lại mười lần vẫn lặp, vì chính cấu trúc câu gây ra: cụm lặp nằm ở cuối một "
-        "câu dài, như câu kết thúc bằng “không bao giờ, không bao giờ!” hay “phải đến nơi, phải đến "
-        "nơi!”. Đổi dấu câu trong bản đọc cũng không hết. Cách chữa hiệu quả là chia câu thành mảnh ở "
-        "khâu sinh tiếng nói: mỗi mảnh đọc riêng rồi nối lại thành một đoạn âm thanh duy nhất, với "
-        "khoảng nghỉ ngắn hơn khoảng nghỉ giữa hai câu. Cách chia này chỉ tồn tại khi đọc; trong sách "
-        "vẫn là một câu với một mã định danh như cũ, nên các ghi nhận kiểm thính trước đó vẫn trỏ đúng.")
-    b.p("Một số ít câu lại là lỗi của bản điện tử: bản ebook thiếu dấu chấm nên hai câu của bản in dính "
-        "làm một, đọc lên nghe rất gượng. Những câu này được tách thành hai câu thật, và câu mới nhận mã "
-        "gắn với mã câu gốc thay vì đánh số tuần tự, để việc thêm một chỗ tách không làm xê dịch mã của "
-        "những câu khác.")
-    b.p("Riêng lỗi chính tả của bản điện tử thì sửa thẳng vào bảng sửa nguồn, đổi cả chữ hiển thị lẫn "
-        "cách đọc, vì bản in gốc không sai những chỗ đó.")
+    b.p("Các file ghi nhận của mọi người được gộp thành một danh sách lỗi chung, sắp theo mã câu, giữ "
+        "nguyên ghi chú của từng người. Nhờ ghi theo mã câu, danh sách này cũng là nơi tra cứu: câu nào "
+        "đã sửa rồi, sửa bằng cách gì, ai là người phát hiện.")
+    b.p("Với mỗi câu, nhóm chọn một trong bốn cách chữa, từ nhẹ tới nặng:")
+    b.numbered("Sửa chính tả của bản điện tử: đổi cả chữ hiển thị lẫn cách đọc, vì bản in gốc không sai "
+               "những chỗ đó.")
+    b.numbered("Sửa cách đọc: viết lại câu theo cách khác cho công cụ đọc, còn chữ hiển thị trong sách "
+               "giữ nguyên văn. Dùng khi văn bản không sai mà công cụ đọc sai, ví dụ đọc số thập phân "
+               "theo kiểu phân cách hàng nghìn, hay đọc sai tên riêng nước ngoài.")
+    b.numbered("Đọc lại: sinh lại câu đó nhiều lần rồi chọn bản tốt nhất. Công cụ sinh tiếng nói lấy mẫu "
+               "ngẫu nhiên nên mỗi lần đọc cho ra một bản khác nhau, cùng một câu lần này đọc hỏng lần "
+               "sau lại đọc đúng. Việc chọn bản do máy làm: cho mô hình nhận dạng nghe lại từng bản, "
+               "loại những bản còn dấu hiệu đọc lặp, rồi lấy bản giống văn bản gốc nhất; bản mới chỉ "
+               "thay bản cũ khi thật sự tốt hơn.")
+    b.numbered("Chia câu thành mảnh khi sinh tiếng nói: mỗi mảnh đọc riêng rồi nối lại thành một đoạn "
+               "âm thanh, với khoảng nghỉ ngắn hơn khoảng nghỉ giữa hai câu. Dùng cho hai trường hợp mà "
+               "đọc lại nhiều lần vẫn hỏng: cụm lặp nằm cuối câu dài, và chỗ ngắt nhịp sai giữa một cụm "
+               "từ. Cách chia chỉ tồn tại khi đọc; trong sách vẫn là một câu với một mã định danh như "
+               "cũ, nên các ghi nhận kiểm thính trước đó vẫn trỏ đúng.")
+    b.p("Để tránh chép sai khi chia mảnh, danh sách chỉ ghi vài chữ làm mốc cắt chứ không chép lại cả "
+        "câu, và chương trình kiểm lại các mảnh ghép lại có khớp từng chữ với bản đọc hay không.")
+    b.p("Một số ít câu là lỗi của bản điện tử chứ không phải lỗi đọc: bản ebook thiếu dấu chấm nên hai "
+        "câu của bản in dính làm một, hoặc dấu chú thích làm một câu bị cắt đôi. Những câu này được tách "
+        "ra hoặc gộp lại cho đúng bản in; câu sinh thêm nhận mã gắn với mã câu gốc, để việc thêm một chỗ "
+        "tách không làm xê dịch mã của các câu khác.")
     b.p("Sau khi sửa, sách được dựng lại rồi nén kèm file chứa mã băm SHA-256 theo đúng cấu trúc thư mục "
         "mà hướng dẫn nộp bài quy định.")
 
