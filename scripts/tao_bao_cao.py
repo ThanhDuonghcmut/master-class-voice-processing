@@ -341,8 +341,8 @@ def viet(d):
         ["lameenc", "Mã hoá MP3 ngay trong Python, không phụ thuộc công cụ cài ngoài"],
         ["faster-whisper", "Nhận dạng tiếng nói để nghe ngược bản đọc, tìm câu đọc lặp hoặc đọc thiếu"],
     ], widths=[4, 12])
-    b.p("Danh sách 6.775 âm tiết tiếng Việt lấy từ đồ án trước của môn học được dùng để dò lỗi chính tả "
-        "trong bản điện tử.")
+    b.p("Ngoài ra nhóm còn dùng một danh sách âm tiết tiếng Việt để dò lỗi chính tả trong bản điện tử: "
+        "từ nào trong sách không phải là âm tiết hợp lệ thì đưa vào danh sách nghi vấn để soi ngữ cảnh.")
 
     b.h("3.3. Phần mềm kiểm thử", 2)
     b.p("Nhóm dùng Thorium Reader để mở sách như một người khiếm thị sẽ dùng: kiểm tra mục lục nhảy đúng "
