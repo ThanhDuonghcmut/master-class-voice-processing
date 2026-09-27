@@ -112,6 +112,7 @@ RESPLIT = [
 
 # 1. TTS đọc thừa một lần cụm ở cuối câu ("…phải đến nơi, phải đến nơi!"), đọc lại mười lần vẫn vậy.
 MANH_LAP_CUOI = {
+    "s001416": ["con hai ba lần"],
     "s001069": ["bé đang kêu"],
     "s001584": ["được nếu cần"],
     "s001884": ["bỗng kêu lên"],
@@ -121,6 +122,8 @@ MANH_LAP_CUOI = {
 # 2. TTS ngắt nhịp sai giữa một cụm ("bản đồ nước Ý treo | ở tường"). Lỗi này chỉ phát hiện được
 #    bằng tai (cạm bẫy 13); cắt đúng ranh giới ý thì chỗ nghỉ rơi vào nơi mong muốn.
 MANH_NGAT_NHIP = {
+    "s001433": ["cậu hé môi nói thật"],
+    "s001469": ["Sung sướng làm sao", "với các bạn thân"],
     "s000136": ["lòng cao cả"],
     "s000192": ["lên cơn điên", "sỏi cháy bỏng"],
     "s000226": ["ở tầng dưới"],

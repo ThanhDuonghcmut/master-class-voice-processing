@@ -157,14 +157,21 @@ def bo_thanh(w):
     return unicodedata.normalize("NFC", "".join(c for c in d if c not in "\u0300\u0301\u0303\u0309\u0323"))
 
 
+# Từ nước ngoài viết thường trong sách này; ASR hay nghe thành hai tiếng rời nên báo lặp giả.
+NGOAI_LAI = {"senor", "senora", "nonna", "tata", "capataz", "peone", "figioeu", "maestro",
+             "pobre", "niño", "noches", "saltare", "banco", "bis", "lira", "album", "vali"}
+
+
 def ten_rieng(text):
-    """Tên riêng và từ nước ngoài: viết hoa giữa câu, hoặc không phải âm tiết tiếng Việt
-    (senor, nonna, capataz) — ASR nghe những từ này thành hai tiếng rời nên hay báo lặp giả."""
-    ten = {m.group(1).lower() for m in re.finditer(r"(?<!^)(?<![.!?“\"…]\s)\b([A-ZÀ-ỸĐ][\wà-ỹ]+)", text)}
-    am = _tu_dien_am_tiet()
-    if am:
-        ten |= {w for w in chuan(text).split() if w.isalpha() and w not in am}
-    return ten
+    """Tên riêng và từ nước ngoài: viết hoa giữa câu, hoặc nằm trong danh sách NGOAI_LAI.
+
+    Từng lọc thêm bằng "không có trong từ điển âm tiết", nhưng từ điển 6.775 âm tiết thiếu nhiều
+    từ tiếng Việt hợp lệ ("ồm", "đưa", "ông") nên luật đó nuốt luôn lỗi lặp thật — bỏ."""
+    # Không dùng dải [A-ZÀ-Ỹ]: trong Python dải này gồm CẢ chữ thường có dấu, nên "ông", "đưa"
+    # cũng bị coi là viết hoa. Kiểm bằng str.isupper() của ký tự đầu.
+    tu = re.findall(r"[^\W\d_]+", text)
+    ten = {w.lower() for i, w in enumerate(tu) if i and w[:1].isupper()}
+    return ten | {w for w in chuan(text).split() if w in NGOAI_LAI}
 
 
 def lap_do_tach_ten(text, nghe, cum):
@@ -228,14 +235,21 @@ def so_lan_lap(tu, n):
     return dem
 
 
+# Từ nước ngoài viết thường trong sách này; ASR hay nghe thành hai tiếng rời nên báo lặp giả.
+NGOAI_LAI = {"senor", "senora", "nonna", "tata", "capataz", "peone", "figioeu", "maestro",
+             "pobre", "niño", "noches", "saltare", "banco", "bis", "lira", "album", "vali"}
+
+
 def ten_rieng(text):
-    """Tên riêng và từ nước ngoài: viết hoa giữa câu, hoặc không phải âm tiết tiếng Việt
-    (senor, nonna, capataz) — ASR nghe những từ này thành hai tiếng rời nên hay báo lặp giả."""
-    ten = {m.group(1).lower() for m in re.finditer(r"(?<!^)(?<![.!?“\"…]\s)\b([A-ZÀ-ỸĐ][\wà-ỹ]+)", text)}
-    am = _tu_dien_am_tiet()
-    if am:
-        ten |= {w for w in chuan(text).split() if w.isalpha() and w not in am}
-    return ten
+    """Tên riêng và từ nước ngoài: viết hoa giữa câu, hoặc nằm trong danh sách NGOAI_LAI.
+
+    Từng lọc thêm bằng "không có trong từ điển âm tiết", nhưng từ điển 6.775 âm tiết thiếu nhiều
+    từ tiếng Việt hợp lệ ("ồm", "đưa", "ông") nên luật đó nuốt luôn lỗi lặp thật — bỏ."""
+    # Không dùng dải [A-ZÀ-Ỹ]: trong Python dải này gồm CẢ chữ thường có dấu, nên "ông", "đưa"
+    # cũng bị coi là viết hoa. Kiểm bằng str.isupper() của ký tự đầu.
+    tu = re.findall(r"[^\W\d_]+", text)
+    ten = {w.lower() for i, w in enumerate(tu) if i and w[:1].isupper()}
+    return ten | {w for w in chuan(text).split() if w in NGOAI_LAI}
 
 
 def lap_do_tach_ten(text, nghe, cum):
