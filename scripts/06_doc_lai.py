@@ -30,7 +30,7 @@ import soundfile as sf
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from book_units import BUILD, ROOT, iter_units, load_book
+from book_units import BUILD, PAUSE_AFTER, ROOT, iter_units, load_book
 
 from asr_kiem import dau_hieu, giong_nhau, nghe_nguoc
 
@@ -104,7 +104,14 @@ def main(argv):
         else:
             diem_cu, co_loi_cu = -abs(cu - expect), ""   # không có ASR: chấm bằng sai lệch thời lượng
 
-        lan_doc = [tts.infer(u.text, voice=VOICE) for _ in range(lan)]
+        def doc_mot_lan():
+            if not u.manh:      # câu chia mảnh (DOC_THEO_MANH) phải đọc đúng cách chia đó
+                return tts.infer(u.text, voice=VOICE)
+            lang = np.zeros(int(PAUSE_AFTER["tach"] * SR), dtype=np.float32)
+            phan = [np.asarray(tts.infer(m, voice=VOICE), dtype=np.float32) for m in u.manh]
+            return np.concatenate([x for m in phan[:-1] for x in (m, lang)] + [phan[-1]])
+
+        lan_doc = [doc_mot_lan() for _ in range(lan)]
         durs = [len(a) / SR for a in lan_doc]
         diem, co_loi = [], []
         for i, a in enumerate(lan_doc):

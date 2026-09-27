@@ -33,6 +33,7 @@ class Unit:
     text: str       # bản đọc (đã bỏ [n])
     para_end: bool = False   # câu cuối đoạn, nghỉ dài hơn
     tach_giua: bool = False  # mảnh giữa của một câu bị tách, nghỉ ngắn hơn
+    manh: tuple = ()         # câu này đọc thành nhiều mảnh rồi nối lại (xem DOC_THEO_MANH)
 
 
 def load_metadata():
@@ -75,8 +76,8 @@ def _paragraph_units(group, paragraphs, notes):
         ss = p["sentences"]
         for i, s in enumerate(ss):
             con_manh = i + 1 < len(ss) and s["id"] != _goc(s["id"]) and _goc(ss[i + 1]["id"]) == _goc(s["id"])
-            yield Unit(group, s["id"], "sent", s["speech"],
-                       para_end=(i == len(ss) - 1), tach_giua=con_manh)
+            yield Unit(group, s["id"], "sent", s["speech"], para_end=(i == len(ss) - 1),
+                       tach_giua=con_manh, manh=tuple(s.get("manh", ())))
         yield from _note_units(group, [n for s in p["sentences"] for n in s["noterefs"]], notes)
 
 

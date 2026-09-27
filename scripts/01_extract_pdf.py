@@ -83,29 +83,29 @@ RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
      "bang": ["- Cậu ở đây à? - Ông đại úy ngạc nhiên hỏi",
               "– Hoan hô! Cậu đã làm tròn nhiệm vụ!"]},
-    # Cụm lặp nằm cuối câu dài thì TTS đọc thừa một lần, đọc lại tám đến mười lần vẫn vậy, đổi dấu
-    # câu trong bản đọc cũng không hết; tách cụm đó thành câu ngắn riêng thì đọc đúng số lần.
     # Bản ebook thiếu dấu chấm sau “của cụ” nên lời kể và lời thoại dính làm một câu dài, nghe rất gượng.
     {"thay": ["s003123"],
      "bang": ["- Thế thì, cho phép tôi, thưa ông… - và bước tới cụ ôm hôn bố, cái đầu bạc của cụ "
               "Crosetti chỉ mới ngang vai người học trò thôi, và bố đưa môi hôn vào vầng trán tôn kính của cụ.",
               "“Giờ, xin mời quá bước lại nhà”, cụ giáo nói."]},
-    {"thay": ["s001584"],
-     "bang": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi bàn "
-              "tay nắm chặt, - chết cũng được nếu cần,",
-              "nhưng phải đến nơi, phải đến nơi!”"]},
-    {"thay": ["s001884"],
-     "bang": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ và "
-              "bỗng kêu lên:",
-              "“Ông ấy chết rồi, chết rồi!”"]},
-    {"thay": ["s003142"],
-     "bang": ["Cụ Crosetti hỏi xem bố làm nghề gì; biết rõ, cụ kêu lên:",
-              "“Tôi rất vui lòng, rất vui lòng!”…"]},
-    {"thay": ["s001069"],
-     "bang": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
-              "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
-              "“Cứu với! Cứu với!”"]},
 ]
+
+# Câu mà TTS đọc thừa một lần cụm ở cuối ("…phải đến nơi, phải đến nơi!"), đọc lại mười lần vẫn
+# vậy và đổi dấu câu cũng không hết. Chia câu thành mảnh CHỈ Ở KHÂU SINH TIẾNG NÓI: mỗi mảnh đọc
+# riêng rồi nối lại thành một clip duy nhất. Sách vẫn là một câu, mã câu không đổi, nên khác hẳn
+# RESPLIT ở trên (dành cho câu mà bản in vốn là hai câu).
+DOC_THEO_MANH = {
+    "s001584": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi "
+                "bàn tay nắm chặt, - chết cũng được nếu cần,",
+                "nhưng phải đến nơi, phải đến nơi!”"],
+    "s001884": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ "
+                "và bỗng kêu lên:", "“Ông ấy chết rồi, chết rồi!”"],
+    "s003142": ["Cụ Crosetti hỏi xem bố làm nghề gì; biết rõ, cụ kêu lên:",
+                "“Tôi rất vui lòng, rất vui lòng!”…"],
+    "s001069": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
+                "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
+                "“Cứu với! Cứu với!”"],
+}
 
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
 # tata = "bố" trong tiếng vùng Napoli (chú thích 31), xuất hiện 21 lần kể cả tiêu đề truyện;
@@ -285,6 +285,23 @@ def apply_resplit(data):
                     break
 
 
+def apply_manh(data):
+    """Gắn danh sách mảnh vào câu, để bước sinh tiếng nói đọc từng mảnh rồi nối lại."""
+    n = 0
+    for lv in data["levels"]:
+        for h in [lv, *lv["chapters"]]:
+            for p in h["paragraphs"]:
+                for s in p["sentences"]:
+                    if s["id"] in DOC_THEO_MANH:
+                        s["manh"] = DOC_THEO_MANH[s["id"]]
+                        n += 1
+    thieu = set(DOC_THEO_MANH) - {s["id"] for lv in data["levels"] for h in [lv, *lv["chapters"]]
+                                  for p in h["paragraphs"] for s in p["sentences"]}
+    if thieu:
+        sys.exit(f"DỪNG: DOC_THEO_MANH có mã câu không tồn tại {sorted(thieu)}")
+    print(f"Đọc theo mảnh: {n} câu")
+
+
 def apply_speech_fixes(data):
     """Đọc sua_cach_doc.csv; dòng có cột speech → thay bản đọc của câu có id đó.
     id đánh tuần tự nên chỉ ổn định khi quy tắc tách câu không đổi: id không tìm thấy → dừng."""
@@ -343,6 +360,7 @@ def main():
 
     data = book.finalize()
     apply_resplit(data)
+    apply_manh(data)
     apply_speech_fixes(data)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")

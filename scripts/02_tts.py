@@ -22,7 +22,7 @@ import numpy as np
 import soundfile as sf
 from vieneu import Vieneu
 
-from book_units import BUILD, iter_units, load_book
+from book_units import BUILD, PAUSE_AFTER, iter_units, load_book
 
 WAV_DIR = BUILD / "wav"
 LOG = BUILD / "tts_log.jsonl"
@@ -34,6 +34,7 @@ SLOW_SEC_PER_CHAR = 0.15
 
 
 def up_to_date(u):
+    """(bản đọc lưu cạnh wav gồm cả cách chia mảnh, đổi mảnh là đọc lại)"""
     """wav đã có VÀ bản đọc lúc sinh (file .txt cạnh wav) trùng bản đọc hiện tại.
     wav cũ chưa có .txt thì coi là trùng và ghi .txt luôn (chỉ xảy ra một lần khi nâng cấp)."""
     wav = WAV_DIR / u.group / f"{u.id}.wav"
@@ -41,15 +42,14 @@ def up_to_date(u):
         return False
     txt = wav.with_suffix(".txt")
     if not txt.exists():
-        txt.write_text(u.text, encoding="utf-8")
+        txt.write_text(" ¦ ".join(u.manh) if u.manh else u.text, encoding="utf-8")
         return True
-    return txt.read_text(encoding="utf-8") == u.text
+    return txt.read_text(encoding="utf-8") == (" ¦ ".join(u.manh) if u.manh else u.text)
 
 
 def main(only):
     book = load_book()
-    todo = [(u.group, u.id, u.text) for u in iter_units(book)
-            if (not only or u.group in only) and not up_to_date(u)]
+    todo = [u for u in iter_units(book) if (not only or u.group in only) and not up_to_date(u)]
     total = sum(1 for _ in iter_units(book))
     print(f"Đơn vị đọc: {total} tổng, {len(todo)} cần sinh, giọng {VOICE}")
     if not todo:
@@ -57,14 +57,20 @@ def main(only):
     tts = Vieneu()
     t_start, audio_sec = time.time(), 0.0
     with LOG.open("a", encoding="utf-8") as log:
-        for k, (group, uid, text) in enumerate(todo, 1):
+        for k, u in enumerate(todo, 1):
+            group, uid, text = u.group, u.id, u.text
             t0 = time.time()
-            audio = tts.infer(text, voice=VOICE)
+            if u.manh:      # đọc từng mảnh rồi nối, khoảng nghỉ như giữa hai mảnh câu tách
+                lang = np.zeros(int(PAUSE_AFTER["tach"] * SAMPLE_RATE), dtype=np.float32)
+                phan = [np.asarray(tts.infer(m, voice=VOICE), dtype=np.float32) for m in u.manh]
+                audio = np.concatenate([x for m in phan[:-1] for x in (m, lang)] + [phan[-1]])
+            else:
+                audio = tts.infer(text, voice=VOICE)
             dur = len(audio) / SAMPLE_RATE
             out = WAV_DIR / group / f"{uid}.wav"
             out.parent.mkdir(parents=True, exist_ok=True)
             sf.write(out, np.asarray(audio, dtype=np.float32), SAMPLE_RATE, subtype="PCM_16")
-            out.with_suffix(".txt").write_text(text, encoding="utf-8")
+            out.with_suffix(".txt").write_text(" ¦ ".join(u.manh) if u.manh else text, encoding="utf-8")
             rec = {"group": group, "id": uid, "chars": len(text), "sec": round(dur, 3),
                    "compute": round(time.time() - t0, 3)}
             if len(text) >= 20 and dur / len(text) > SLOW_SEC_PER_CHAR:   # text ngắn luôn "chậm" giả
