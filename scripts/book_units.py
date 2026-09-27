@@ -19,7 +19,10 @@ NOTE_LABEL = "Chú thích:"      # đọc trước mỗi chú thích; không có
 # trung vị 0,71 s (0,52–0,89). Lúc chọn 0,8 thì clip SMIL chưa bao khoảng nghỉ nên Thorium
 # thực phát 0 s (cạm bẫy 8); sau khi sửa, trả về đúng số đo: 0,6 (=0,7 nghe được).
 PAUSE_AFTER = {"front": 1.6, "h1": 1.9, "h2": 1.6, "dateline": 1.1, "sent": 0.6, "para_end": 1.1,
-               "note_label": 0.3, "note_sent": 0.6, "note_end": 1.1}
+               "note_label": 0.3, "note_sent": 0.6, "note_end": 1.1,
+               # Giữa hai mảnh của MỘT câu bị tách (xem RESPLIT trong 01_extract_pdf.py): trong sách
+               # chỗ đó chỉ là dấu phẩy hay dấu hai chấm, nghỉ bằng nghỉ giữa hai câu sẽ nghe rời rạc.
+               "tach": 0.35}
 
 
 @dataclass
@@ -28,7 +31,8 @@ class Unit:
     id: str         # id phần tử trong dtbook.xml
     kind: str       # h1 | h2 | dateline | sent | note_label | note_sent
     text: str       # bản đọc (đã bỏ [n])
-    para_end: bool = False   # câu cuối đoạn → nghỉ dài hơn
+    para_end: bool = False   # câu cuối đoạn, nghỉ dài hơn
+    tach_giua: bool = False  # mảnh giữa của một câu bị tách, nghỉ ngắn hơn
 
 
 def load_metadata():
@@ -60,10 +64,19 @@ def iter_units(book):
             yield from _paragraph_units(ch["id"], ch["paragraphs"], notes)
 
 
+def _goc(sid):
+    """"s001584r2" → "s001584"; mã thường trả về chính nó."""
+    import re
+    return re.sub(r"r\d+$", "", sid)
+
+
 def _paragraph_units(group, paragraphs, notes):
     for p in paragraphs:
-        for i, s in enumerate(p["sentences"]):
-            yield Unit(group, s["id"], "sent", s["speech"], para_end=(i == len(p["sentences"]) - 1))
+        ss = p["sentences"]
+        for i, s in enumerate(ss):
+            con_manh = i + 1 < len(ss) and s["id"] != _goc(s["id"]) and _goc(ss[i + 1]["id"]) == _goc(s["id"])
+            yield Unit(group, s["id"], "sent", s["speech"],
+                       para_end=(i == len(ss) - 1), tach_giua=con_manh)
         yield from _note_units(group, [n for s in p["sentences"] for n in s["noterefs"]], notes)
 
 

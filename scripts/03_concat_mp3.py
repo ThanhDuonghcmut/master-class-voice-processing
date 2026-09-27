@@ -64,7 +64,8 @@ def build_group(group, units):
         audio, sr = sf.read(w, dtype="float32")
         assert sr == SR, f"{w}: {sr} Hz, cần {SR}"
         audio = trim(audio)
-        pause = PAUSE_AFTER["para_end" if u.para_end and u.kind == "sent" else
+        pause = PAUSE_AFTER["tach" if u.tach_giua else
+                            "para_end" if u.para_end and u.kind == "sent" else
                             "note_end" if u.para_end and u.kind == "note_sent" else u.kind]
         gap = np.zeros(int(pause * SR), dtype=np.float32)
         # Clip BAO LUÔN khoảng nghỉ sau câu: trình đọc DAISY phát clipBegin→clipEnd rồi nhảy
