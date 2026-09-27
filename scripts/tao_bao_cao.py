@@ -46,13 +46,10 @@ def so_lieu():
         rows = list(csv.DictReader(f.open(encoding="utf-8")))
         quet[f.stem] = rows
     src = (ROOT / "scripts" / "01_extract_pdf.py").read_text(encoding="utf-8")
-    n_chinh_ta = src.count('": "', src.index("SOURCE_FIXES"), src.index("# Câu mà TTS đọc thừa"))
-    # DOC_THEO_MANH gồm hai nhóm, ngăn bởi dòng chú thích "Ngắt sai giữa cụm"
-    i0, i1 = src.index("DOC_THEO_MANH"), src.index("# Ngắt sai giữa cụm")
-    i2 = src.index("# Chỉ đổi BẢN ĐỌC")
-    n_manh_ngat = src.count('": [', i1, i2)
-    n_manh_lap = src.count('": [', i0, i2) - n_manh_ngat
-    n_resplit = src.count('{"thay":', src.index("RESPLIT = ["), src.index("# Câu mà TTS đọc thừa"))
+    n_chinh_ta = src.count('": "', src.index("SOURCE_FIXES"), src.index("# Hai câu liền nhau"))
+    n_manh_lap = src.count('": [', src.index("MANH_LAP_CUOI"), src.index("MANH_NGAT_NHIP"))
+    n_manh_ngat = src.count('": [', src.index("MANH_NGAT_NHIP"), src.index("DOC_THEO_MANH = {**"))
+    n_resplit = src.count('{"thay":', src.index("RESPLIT = ["), src.index("# Hai bảng dưới cùng"))
     tong_giay = sum(v["duration"] for v in timing.values())
     tieng_doc = sum(r["sec"] for r in tts if r.get("sec"))
     return {

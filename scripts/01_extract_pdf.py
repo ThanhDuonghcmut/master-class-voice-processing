@@ -99,11 +99,28 @@ RESPLIT = [
 # vậy và đổi dấu câu cũng không hết. Chia câu thành mảnh CHỈ Ở KHÂU SINH TIẾNG NÓI: mỗi mảnh đọc
 # riêng rồi nối lại thành một clip duy nhất. Sách vẫn là một câu, mã câu không đổi, nên khác hẳn
 # RESPLIT ở trên (dành cho câu mà bản in vốn là hai câu).
-DOC_THEO_MANH = {
-    # Hai câu dưới đây chia mảnh vì lý do khác: TTS ngắt nhịp sai giữa một cụm ("Những tấm lòng cao
-    # | cả", "cuội | sỏi"). Thêm dấu phẩy vào bản đọc không ăn thua; chia mảnh đúng ranh giới ý thì
-    # chỗ nghỉ rơi vào đúng chỗ. Lỗi ngắt nhịp chỉ phát hiện được bằng tai, xem cạm bẫy 13.
-    # Ngắt sai giữa cụm: chia mảnh để chỗ nghỉ rơi đúng ranh giới ý.
+# Hai bảng dưới cùng cơ chế (chia câu thành mảnh CHỈ Ở KHÂU SINH TIẾNG NÓI: mỗi mảnh đọc riêng
+# rồi nối lại thành một clip, sách vẫn là một câu và mã câu không đổi) nhưng chữa hai lỗi khác nhau.
+
+# 1. TTS đọc thừa một lần cụm ở cuối câu ("…phải đến nơi, phải đến nơi!"), đọc lại mười lần vẫn
+#    vậy và đổi dấu câu cũng không hết.
+MANH_LAP_CUOI = {
+    "s001584": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi "
+                "bàn tay nắm chặt, - chết cũng được nếu cần,",
+                "nhưng phải đến nơi, phải đến nơi!”"],
+    "s001884": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ "
+                "và bỗng kêu lên:", "“Ông ấy chết rồi, chết rồi!”"],
+    "s003142": ["Cụ Crosetti hỏi xem bố làm nghề gì; biết rõ, cụ kêu lên:",
+                "“Tôi rất vui lòng, rất vui lòng!”…"],
+    "s001069": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
+                "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
+                "“Cứu với! Cứu với!”"],
+}
+
+# 2. TTS ngắt nhịp sai giữa một cụm ("bản đồ nước Ý treo | ở tường", "Những tấm lòng cao | cả").
+#    Lỗi này chỉ phát hiện được bằng tai (xem cạm bẫy 13); chia mảnh đúng ranh giới ý thì chỗ nghỉ
+#    rơi vào nơi mong muốn.
+MANH_NGAT_NHIP = {
     "s000338": ["Nói xong, thầy Perboni đứng lên và chỉ trên bản đồ nước Ý treo ở tường",
                 "cái điểm vẽ thành phố Reggio di Calabria."],
     "s000345": ["Rồi ôm hôn cậu", "nồng nàn trên hai má!"],
@@ -137,17 +154,9 @@ DOC_THEO_MANH = {
                 "hay bên bờ sông cuội sỏi cháy bỏng,",
                 "hay trong xưởng thủy tinh mặt lúc nào cũng cúi sát lò lửa, phải bắt đầu ngày lao "
                 "động rất sớm, và chẳng bao giờ được nghỉ lễ, nghỉ hè."],
-    "s001584": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi "
-                "bàn tay nắm chặt, - chết cũng được nếu cần,",
-                "nhưng phải đến nơi, phải đến nơi!”"],
-    "s001884": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ "
-                "và bỗng kêu lên:", "“Ông ấy chết rồi, chết rồi!”"],
-    "s003142": ["Cụ Crosetti hỏi xem bố làm nghề gì; biết rõ, cụ kêu lên:",
-                "“Tôi rất vui lòng, rất vui lòng!”…"],
-    "s001069": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
-                "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
-                "“Cứu với! Cứu với!”"],
 }
+
+DOC_THEO_MANH = {**MANH_LAP_CUOI, **MANH_NGAT_NHIP}
 
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
 # tata = "bố" trong tiếng vùng Napoli (chú thích 31), xuất hiện 21 lần kể cả tiêu đề truyện;
