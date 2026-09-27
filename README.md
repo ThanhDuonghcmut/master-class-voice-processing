@@ -11,13 +11,13 @@ Cần **Git** và **Python 3** (bản nào cũng được): macOS có sẵn (`xc
 ```bash
 git clone https://github.com/ThanhDuonghcmut/master-class-voice-processing.git
 cd master-class-voice-processing
-python3 scripts/qa.py            # kiểm máy → lần đầu tự tải sách từ GitHub Release (~290 MB) → mở http://localhost:8765/qa.html
+python3 scripts/qa.py            # kiểm máy → tải sách (hoặc cập nhật khi có bản mới) → mở http://localhost:8765/qa.html
 python3 scripts/qa.py submit     # nghe xong, đã bấm Xuất CSV → commit + push lên repo
 ```
 
 Windows: thay `python3` bằng `py -3` (hoặc `python`), gõ trong PowerShell hay Git Bash đều được.
 
-`qa.py` tự kiểm git / Python / đĩa / cổng, in `[OK]`/`[FAIL]` kèm cách sửa. Các lệnh khác: `python3 scripts/qa.py check` (chỉ kiểm), `python3 scripts/qa.py fetch --force` (tải lại khi có release mới).
+`qa.py` tự kiểm git / Python / đĩa / cổng, in `[OK]`/`[FAIL]` kèm cách sửa, rồi **tự so bản sách đang có với bản mới nhất trên GitHub** — cũ thì xoá và tải lại, mới nhất rồi thì mở luôn. Các lệnh khác: `python3 scripts/qa.py check` (chỉ kiểm), `python3 scripts/qa.py fetch --force` (ép tải lại).
 
 **Chia 3 phần cân thời lượng** (hiện sẵn trong mục lục trái của trang QA):
 
@@ -40,7 +40,7 @@ Windows: thay `python3` bằng `py -3` (hoặc `python`), gõ trong PowerShell h
 
 Ghi chú nói **lỗi gì, ở từ nào**: "nghỉ sai sau *giáo*", "đọc *4,444* thành bốn nghìn", "tên *Garrone* đọc lạ". Xuất nhiều lần cũng được — mỗi lần một file, người gộp sẽ hợp nhất.
 
-Có bản sách mới (release mới): `python3 scripts/qa.py fetch --force`.
+Muốn kiểm lại một câu đã báo: gõ **mã câu** (vd `s001467`) vào ô trên cùng rồi Enter, trang nhảy thẳng tới câu đó. Mở bằng đường dẫn cũng được: `http://localhost:8765/qa.html#s001467`.
 
 ## Người giữ repo: gộp QA và sửa cách đọc
 

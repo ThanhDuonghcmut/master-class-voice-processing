@@ -10,6 +10,7 @@ POST về /save → qa/qa_<ten>_<YYYY-MM-DD_HHMMSS>.csv trong repo.
 """
 import json
 import re
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -28,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT, QA = ROOT / "out", ROOT / "qa"
 SLUG = json.loads((ROOT / "metadata.json").read_text(encoding="utf-8"))["slug"]
 BOOK_DIR, QA_HTML = OUT / SLUG, OUT / "qa.html"
+DAU_BAN = OUT / ".phien_ban"        # ghi tên bản đã tải, để biết khi nào cần tải lại
 PORT = 8765
 
 
@@ -84,12 +86,34 @@ def download(url, dest):
     print()
 
 
+def ban_moi_nhat():
+    """Tên bản phát hành mới nhất trên GitHub, hoặc None nếu không hỏi được (máy không có mạng)."""
+    try:
+        with urllib.request.urlopen(
+                f"https://api.github.com/repos/{repo_slug()}/releases/latest", timeout=10) as r:
+            return json.load(r).get("tag_name")
+    except Exception:
+        return None
+
+
 def fetch(force=False):
-    if BOOK_DIR.joinpath("package.opf").exists() and QA_HTML.exists() and not force:
-        return
+    da_co = BOOK_DIR.joinpath("package.opf").exists() and QA_HTML.exists()
+    ban_dang_co = DAU_BAN.read_text(encoding="utf-8").strip() if DAU_BAN.exists() else None
+    ban_moi = ban_moi_nhat()
+    if da_co and not force:
+        if ban_moi is None:
+            print(f"Không hỏi được bản mới (mất mạng?), dùng sách đang có"
+                  f"{' — bản ' + ban_dang_co if ban_dang_co else ''}.")
+            return
+        if ban_dang_co == ban_moi:
+            print(f"Sách đang có đã là bản mới nhất ({ban_moi}).")
+            return
+        print(f"Có bản mới: {ban_dang_co or 'bản cũ'} → {ban_moi}. Xoá sách cũ rồi tải lại.")
+        shutil.rmtree(BOOK_DIR, ignore_errors=True)
+        QA_HTML.unlink(missing_ok=True)
     base = f"https://github.com/{repo_slug()}/releases/latest/download/"
     OUT.mkdir(exist_ok=True)
-    print("Tải sách từ release mới nhất (~290 MB, một lần)…")
+    print(f"Tải sách bản {ban_moi or 'mới nhất'} (~290 MB, một lần)…")
     zpath = OUT / f"{SLUG}.zip"
     download(base + f"{SLUG}.zip", zpath)
     download(base + "qa.html", QA_HTML)
@@ -97,7 +121,10 @@ def fetch(force=False):
     with zipfile.ZipFile(zpath) as z:
         z.extractall(BOOK_DIR)
     zpath.unlink()
-    print(f"→ {BOOK_DIR.relative_to(ROOT)}/ ({sum(1 for _ in BOOK_DIR.iterdir())} file)")
+    if ban_moi:
+        DAU_BAN.write_text(ban_moi, encoding="utf-8")
+    print(f"→ {BOOK_DIR.relative_to(ROOT)}/ ({sum(1 for _ in BOOK_DIR.iterdir())} file)"
+          + (f", bản {ban_moi}" if ban_moi else ""))
 
 
 # ---------- server trang QA ----------
