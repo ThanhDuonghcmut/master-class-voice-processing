@@ -85,7 +85,8 @@ SOURCE_FIXES = {
 # cắt block giữa chừng, ví dụ tên phố "Dora | Grossa"). Gộp lại, giữ mã của câu đầu để mã các câu
 # khác không trôi; mã câu sau được ánh xạ về câu đầu cho ghi nhận QA cũ.
 GOP_CAU = [("s000305", "s000306"),    # "đường phố Dora | Grossa"
-           ("s000695", "s000696")]    # "ông được tặng năm | 1866 khi đang ở trung đoàn…"
+           ("s000695", "s000696"),    # "ông được tặng năm | 1866 khi đang ở trung đoàn…"
+           ("s001024", "s001025")]    # "Cậu bé người | Calabria chưa bao giờ thấy tuyết…"
 
 RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
@@ -124,6 +125,33 @@ MANH_LAP_CUOI = {
 #    Lỗi này chỉ phát hiện được bằng tai (xem cạm bẫy 13); chia mảnh đúng ranh giới ý thì chỗ nghỉ
 #    rơi vào nơi mong muốn.
 MANH_NGAT_NHIP = {
+    "s000957": ["Nhỡ một đồng xu từ túi cậu rơi xuống gầm ghế, thì cậu ta có thể tìm suốt mấy giờ liền",
+                "cho kỳ được."],
+    "s000979": ["Đi qua phố Dora Grossa, chúng tôi trông thấy Stardi đang lấy chân đá những bạn",
+                "không may làm vướng nó."],
+    "s000985": ["Sau khi chạy một hồi trên đường cái",
+                "bỏ rất xa ông Votini đang đi thong thả ở đằng sau, chúng tôi dừng lại trước một cái "
+                "ghế đá, cạnh một cậu bé ăn mặc giản dị, có vẻ mệt, và đang ngồi nghỉ, đầu cúi xuống."],
+    "s000986": ["Một người lớn, cô lẽ là bố cậu bé, vừa đi đi lại lại",
+                "vừa đọc báo dưới bóng cây."],
+    "s000994": ["Anh chàng bên", "quay quay cái mũ dạ trắng đẹp của mình trên đầu ngón tay."],
+    "s001039": ["Vừa bước vào nhà",
+                "cậu đã bỏ cái mũ lưỡi trai bị tuyết làm ướt sũng, và đút vào túi, rồi bước tới với "
+                "cái dáng điệu chậm chạp của người thợ mệt nhọc, quay sang bên này lại sang bên kia "
+                "cái mặt tròn như quả táo, với cái mũi tẹt."],
+    "s001173": ["Ông tuổi đã cao và lao động quá sức lại càng làm ông già đi nhiều", "so với tuổi."],
+    "s001175": ["Sau cùng, ông nhận của một nhà xuất bản sách báo việc viết tên và địa chỉ của những "
+                "người mua sách, báo dài hạn", "lên những băng giấy để gửi đi."],
+    "s001189": ["Một đêm, chờ cho bố ngủ yên, cậu trở dậy, lặng lẽ mặc áo, rón rén mò vào phòng làm "
+                "việc của bố, thắp đèn lên, lại ngồi vào bàn giấy trước một chồng băng còn trắng nguyên",
+                "và bản danh sách người mua báo; rồi cậu bắt đầu viết, bắt chước y hệt nét chữ của bố."],
+    "s001206": ["Nửa đêm hôm sau", "Giulio lại dậy làm việc."],
+    "s001227": ["Và vừa nói, ông vừa lấy trong túi ra một gói kẹo ông đã mua",
+                "để cùng các con ăn mừng khoản tiền thu trội ấy."],
+    "s001237": ["Nhưng mệt nhọc chồng chất thêm vào mệt nhọc,",
+                "càng ngày cậu càng khó mà chống chọi nổi."],
+    "s001259": ["Điều quan trọng là giúp bố kiếm ăn và làm nhẹ bớt nỗi mệt nhọc",
+                "đang làm bố chết dần, chết mòn”."],
     "s000538": ["Cậu có một con dao chuôi nạm xà cừ",
                 "cậu bắt được năm ngoái trên quảng trường Vũ khí; một hôm dùng dao, cậu bị khía một "
                 "nhát sâu vào ngón tay, nhưng trong lớp chẳng ai hay biết gì cả, và về nhà cậu cũng "
@@ -408,6 +436,13 @@ def apply_manh(data):
                 for s in p["sentences"]:
                     if s["id"] in DOC_THEO_MANH:
                         s["manh"] = DOC_THEO_MANH[s["id"]]
+                        # Ghép các mảnh lại phải đúng từng CHỮ so với bản đọc (dấu câu thì được
+                        # phép thêm bớt, vì chính nó ép chỗ ngắt); soạn sai một chữ là TTS đọc sai.
+                        chu = lambda t: " ".join(re.sub(r"[^\w\s]", " ", t.lower()).split())
+                        if chu(" ".join(s["manh"])) != chu(s["speech"]):
+                            sys.exit(f"DỪNG: mảnh của {s['id']} ghép lại không khớp bản đọc.\n"
+                                     f"  bản đọc  : {s['speech']}\n"
+                                     f"  ghép mảnh: {' '.join(s['manh'])}")
                         n += 1
     thieu = set(DOC_THEO_MANH) - {s["id"] for lv in data["levels"] for h in [lv, *lv["chapters"]]
                                   for p in h["paragraphs"] for s in p["sentences"]}
