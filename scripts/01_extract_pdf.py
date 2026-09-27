@@ -103,6 +103,14 @@ DOC_THEO_MANH = {
     # Hai câu dưới đây chia mảnh vì lý do khác: TTS ngắt nhịp sai giữa một cụm ("Những tấm lòng cao
     # | cả", "cuội | sỏi"). Thêm dấu phẩy vào bản đọc không ăn thua; chia mảnh đúng ranh giới ý thì
     # chỗ nghỉ rơi vào đúng chỗ. Lỗi ngắt nhịp chỉ phát hiện được bằng tai, xem cạm bẫy 13.
+    # Ngắt sai giữa cụm: chia mảnh để chỗ nghỉ rơi đúng ranh giới ý.
+    "s000226": ["Tôi vui thích thấy lại căn phòng rộng ở tầng dưới",
+                "thông với bảy lớp học, mà suốt ba năm gần như ngày nào tôi cũng đi qua."],
+    "s000232": ["Tôi trông thấy thầy hiệu trưởng, mà bộ râu",
+                "hình như có bạc hơn năm ngoái một ít, đang bị vây giữa những bà mẹ khá phật ý vì "
+                "không còn chỗ để cho con họ vào học nữa."],
+    "s000241": ["Người thầy", "nhỏ nhắn đến nỗi làm cho chúng tôi cứ tưởng như là một người bạn."],
+    "s000283": ["Các con hãy tỏ ra cho thầy thấy", "là những đứa trẻ chân thành, dũng cảm."],
     "s000136": ["Và vì thế mà Những tấm lòng cao cả",
                 "không phải chỉ là một cuốn sách riêng dành cho thiếu nhi, mà lại còn là một cuốn "
                 "sách viết cho cô giáo, thầy giáo cho bố mẹ học sinh và cho những người lớn trong "
@@ -127,7 +135,9 @@ DOC_THEO_MANH = {
 # Chỉ đổi BẢN ĐỌC, giữ nguyên chữ hiển thị — dùng cho từ mà TTS phát âm sai.
 # tata = "bố" trong tiếng vùng Napoli (chú thích 31), xuất hiện 21 lần kể cả tiêu đề truyện;
 # VieNeu đọc "tata" thành "tót ta" hoặc nuốt còn "ta" → gạch nối ép đọc rõ hai âm tiết.
-SPEECH_FIXES = {"tata": "ta-ta", "Tata": "Ta-ta"}
+SPEECH_FIXES = {"tata": "ta-ta", "Tata": "Ta-ta",
+                # TTS đọc "Robetti" thành "Róp ti"; gạch nối ép đọc rõ ba âm tiết (14 chỗ trong sách)
+                "Robetti": "Rô-bét-ti"}
 
 
 def line_kind(line):
