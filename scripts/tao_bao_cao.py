@@ -56,7 +56,8 @@ def so_lieu():
         "so_cau": sum(1 for u in units if u.kind in ("sent", "note_sent")),
         "so_clip": len(units),
         "so_ky_tu": sum(len(u.text) for u in units),
-        "so_tu": sum(len(u.text.split()) for u in units),
+        # Tiếng Việt viết rời từng âm tiết nên tách theo khoảng trắng là đếm TIẾNG, không phải từ
+        "so_tieng": sum(len(u.text.split()) for u in units),
         "phut_may": sum(r["compute"] for r in tts) / 60,
         "rtf": sum(r["compute"] for r in tts) / max(sum(r["sec"] for r in tts), 1),
         "n_doc_lai": sum(1 for r in fixes if r.get("doc_lai")),
@@ -357,7 +358,7 @@ def viet(d):
         ["Số câu có đồng bộ văn bản và âm thanh", f'{so(d["so_clip"])} câu'],
         ["Số đoạn văn", so(d["book"]["stats"]["paragraphs"])],
         ["Số chú thích", f'{d["book"]["stats"]["notes"]} chú thích, đọc ngay tại chỗ tham chiếu'],
-        ["Số từ", f'{so(d["so_tu"])} từ'],
+        ["Số tiếng", so(d["so_tieng"])],
         ["Số file âm thanh", f'{d["so_mp3"]} file MP3, mỗi truyện một file'],
         ["Dung lượng âm thanh", f'{d["dung_luong"]:.0f} MB'],
         ["Tổng số file trong sách", f'{d["so_file_sach"]} file'],
