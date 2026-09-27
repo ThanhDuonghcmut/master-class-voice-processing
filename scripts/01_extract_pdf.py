@@ -95,6 +95,18 @@ RESPLIT = [
 # riêng rồi nối lại thành một clip duy nhất. Sách vẫn là một câu, mã câu không đổi, nên khác hẳn
 # RESPLIT ở trên (dành cho câu mà bản in vốn là hai câu).
 DOC_THEO_MANH = {
+    # Hai câu dưới đây chia mảnh vì lý do khác: TTS ngắt nhịp sai giữa một cụm ("Những tấm lòng cao
+    # | cả", "cuội | sỏi"). Thêm dấu phẩy vào bản đọc không ăn thua; chia mảnh đúng ranh giới ý thì
+    # chỗ nghỉ rơi vào đúng chỗ. Lỗi ngắt nhịp chỉ phát hiện được bằng tai, xem cạm bẫy 13.
+    "s000136": ["Và vì thế mà Những tấm lòng cao cả",
+                "không phải chỉ là một cuốn sách riêng dành cho thiếu nhi, mà lại còn là một cuốn "
+                "sách viết cho cô giáo, thầy giáo cho bố mẹ học sinh và cho những người lớn trong "
+                "xã hội nữa."],
+    "s000192": ["Tháng sáu, trẻ ngồi học mà như sắp lên cơn điên,",
+                "bà Bottini nhắc con là có những trẻ phải làm lụng ngoài đồng dưới mặt trời đổ lửa, "
+                "hay bên bờ sông cuội sỏi cháy bỏng,",
+                "hay trong xưởng thủy tinh mặt lúc nào cũng cúi sát lò lửa, phải bắt đầu ngày lao "
+                "động rất sớm, và chẳng bao giờ được nghỉ lễ, nghỉ hè."],
     "s001584": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi "
                 "bàn tay nắm chặt, - chết cũng được nếu cần,",
                 "nhưng phải đến nơi, phải đến nơi!”"],
