@@ -193,7 +193,10 @@ DOC_THEO_MANH = {**MANH_LAP_CUOI, **MANH_NGAT_NHIP}
 # VieNeu đọc "tata" thành "tót ta" hoặc nuốt còn "ta" → gạch nối ép đọc rõ hai âm tiết.
 SPEECH_FIXES = {"tata": "ta-ta", "Tata": "Ta-ta",
                 # TTS đọc "Robetti" thành "Róp ti"; gạch nối ép đọc rõ ba âm tiết (14 chỗ trong sách)
-                "Robetti": "Rô-bét-ti"}
+                "Robetti": "Rô-bét-ti",
+                # "Firenze" đọc thành "phai-ần"; tên này hiếm trong dữ liệu huấn luyện nên mô hình
+                # đoán theo lối chữ Anh, khác với "Florence" quen thuộc thì đọc đúng
+                "Firenze": "Phi-ren-giơ"}
 
 
 def line_kind(line):
