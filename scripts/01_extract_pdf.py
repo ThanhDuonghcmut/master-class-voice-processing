@@ -83,13 +83,21 @@ RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
      "bang": ["- Cậu ở đây à? - Ông đại úy ngạc nhiên hỏi",
               "– Hoan hô! Cậu đã làm tròn nhiệm vụ!"]},
-    # Lời kêu nằm cuối câu dài thì TTS đọc thành bốn lần dù đọc lại tám lần; tách riêng ra
-    # câu ngắn thì đọc đúng hai lần.
+    # Cụm lặp nằm cuối câu dài thì TTS đọc thừa một lần, đọc lại tám đến mười lần vẫn vậy, đổi dấu
+    # câu trong bản đọc cũng không hết; tách cụm đó thành câu ngắn riêng thì đọc đúng số lần.
     # Bản ebook thiếu dấu chấm sau “của cụ” nên lời kể và lời thoại dính làm một câu dài, nghe rất gượng.
     {"thay": ["s003123"],
      "bang": ["- Thế thì, cho phép tôi, thưa ông… - và bước tới cụ ôm hôn bố, cái đầu bạc của cụ "
               "Crosetti chỉ mới ngang vai người học trò thôi, và bố đưa môi hôn vào vầng trán tôn kính của cụ.",
               "“Giờ, xin mời quá bước lại nhà”, cụ giáo nói."]},
+    {"thay": ["s001584"],
+     "bang": ["“Kìa, đi đi chứ, chạy đi chứ! - viên đại úy nói, hai hàm răng nghiến chặt và đôi bàn "
+              "tay nắm chặt, - chết cũng được nếu cần,",
+              "nhưng phải đến nơi, phải đến nơi!”"]},
+    {"thay": ["s001884"],
+     "bang": ["Một người đàn bà đi bên cạnh cáng, bế một đứa bé; bà ta như điên cuồng vì đau khổ và "
+              "bỗng kêu lên:",
+              "“Ông ấy chết rồi, chết rồi!”"]},
     {"thay": ["s001069"],
      "bang": ["Ngay lúc ấy, người ta nghe một tiếng thét to bên kia đường, và thấy một cụ già đang "
               "lảo đảo, hai tay đưa lên úp lấy mặt, và bên cạnh một em bé đang kêu:",
