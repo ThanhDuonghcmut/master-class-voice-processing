@@ -22,6 +22,8 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import os
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT, QA = ROOT / "out", ROOT / "qa"
 SLUG = json.loads((ROOT / "metadata.json").read_text(encoding="utf-8"))["slug"]
@@ -99,7 +101,62 @@ def fetch(force=False):
 
 
 # ---------- server trang QA ----------
+class _DoanFile:
+    """Bọc file để chỉ trả đúng số byte của đoạn được yêu cầu."""
+
+    def __init__(self, f, con):
+        self.f, self.con = f, con
+
+    def read(self, n=-1):
+        if self.con <= 0:
+            return b""
+        d = self.f.read(self.con if n < 0 else min(n, self.con))
+        self.con -= len(d)
+        return d
+
+    def close(self):
+        self.f.close()
+
+
 class Handler(SimpleHTTPRequestHandler):
+    def send_head(self):
+        """Hỗ trợ HTTP Range. Thiếu nó thì trình duyệt không nhảy được vào giữa file mp3 dài:
+        bấm một câu ở giữa truyện, audio.currentTime bị bỏ qua và phát lại từ đầu truyện."""
+        rng = self.headers.get("Range")
+        if not rng or not rng.startswith("bytes="):
+            return super().send_head()
+        path = self.translate_path(self.path)
+        try:
+            f = open(path, "rb")
+        except OSError:
+            self.send_error(404)
+            return None
+        co = os.fstat(f.fileno()).st_size
+        dau, _, cuoi = rng[6:].partition("-")
+        dau = int(dau) if dau else 0
+        cuoi = int(cuoi) if cuoi else co - 1
+        cuoi = min(cuoi, co - 1)
+        if dau >= co:
+            f.close()
+            self.send_error(416)
+            return None
+        f.seek(dau)
+        self.send_response(206)
+        self.send_header("Content-Type", self.guess_type(path))
+        self.send_header("Content-Range", f"bytes {dau}-{cuoi}/{co}")
+        self.send_header("Content-Length", str(cuoi - dau + 1))
+        self.send_header("Accept-Ranges", "bytes")
+        self.end_headers()
+        return _DoanFile(f, cuoi - dau + 1)
+
+    def end_headers(self):
+        if "Accept-Ranges" not in self._headers_buffer_text():
+            self.send_header("Accept-Ranges", "bytes")
+        super().end_headers()
+
+    def _headers_buffer_text(self):
+        return b"".join(getattr(self, "_headers_buffer", [])).decode("latin-1", "replace")
+
     def do_POST(self):
         if self.path != "/save":
             self.send_error(404)
