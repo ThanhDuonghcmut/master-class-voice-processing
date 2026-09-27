@@ -21,7 +21,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from asr_kiem import dau_hieu, giong_nhau, ngat_nhip, nghe_nguoc
+from asr_kiem import dau_hieu, giong_nhau, lap_o_duoi, ngat_nhip, nghe_duoi, nghe_nguoc
 from book_units import BUILD, ROOT, groups_in_order, iter_units, load_book
 
 OUT = BUILD / "asr_quet.csv"
@@ -35,7 +35,8 @@ def cham_diem(viec):
     """(id, nhóm, văn bản, đường dẫn wav) thành (id, nhóm, văn bản, ASR nghe ra, điểm)."""
     sid, group, text, wav = viec
     nghe, moc = nghe_nguoc(wav, moc_tu=True)
-    return sid, group, text, nghe, giong_nhau(nghe, text), moc
+    co = dau_hieu(text, nghe) or lap_o_duoi(text, nghe_duoi(wav))
+    return sid, group, text, nghe, giong_nhau(nghe, text), moc, co
 
 
 def chon_nhom(book, argv):
@@ -84,19 +85,18 @@ def main(argv):
         w = csv.writer(f)
         w.writerow(["id", "nhom", "truyen", "diem", "dau_hieu", "ngat_nhip", "van_ban",
                     "asr_nghe_ra", "moc_tu"])
-        for sid, g, text, nghe, diem, moc in ket_qua:
-            w.writerow([sid, g, ten.get(g, g), f"{diem:.3f}", dau_hieu(text, nghe),
+        for sid, g, text, nghe, diem, moc, co in ket_qua:
+            w.writerow([sid, g, ten.get(g, g), f"{diem:.3f}", co,
                         " | ".join(ngat_nhip(text, moc)), text, nghe, json.dumps(moc, ensure_ascii=False)])
     NGAN = 25   # câu quá ngắn (dòng ngày, nhãn "Chú thích:") điểm dao động mạnh, nhiều báo giả
     # Chỉ dùng dấu hiệu lặp/thiếu. Cột ngắt nhịp vẫn ghi ra file để tham khảo nhưng KHÔNG dùng để
     # báo động: xem ghi chú trong asr_kiem.ngat_nhip.
-    nghi = [r for r in ket_qua if dau_hieu(r[2], r[3]) and len(r[2]) >= NGAN]
+    nghi = [r for r in ket_qua if r[6] and len(r[2]) >= NGAN]
     print(f"\nXong trong {(time.time()-t0)/60:.0f} phút. Điểm giống trung bình "
           f"{sum(r[4] for r in ket_qua)/len(ket_qua):.3f}; {len(nghi)} câu có dấu hiệu đọc lặp "
           f"hoặc đọc thiếu ({len(nghi)/len(ket_qua)*100:.1f}%)")
     print(f"Chi tiết mọi câu: {OUT.relative_to(ROOT)}\n\nCâu cần nghe lại:")
-    for sid, g, text, nghe, diem, moc in nghi:
-        co = dau_hieu(text, nghe)
+    for sid, g, text, nghe, diem, moc, co in nghi:
         print(f"  [{co[:70]}] điểm {diem:.2f}  {sid} [{ten.get(g, g)[:22]}]")
         print(f"       sách : {text[:100]}")
         print(f"       nghe : {nghe[:100]}")

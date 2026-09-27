@@ -32,7 +32,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from book_units import BUILD, PAUSE_AFTER, ROOT, iter_units, load_book
 
-from asr_kiem import dau_hieu, giong_nhau, nghe_nguoc
+from asr_kiem import dau_hieu, giong_nhau, lap_o_duoi, nghe_duoi, nghe_nguoc
 
 WAV_DIR, BACKUP = BUILD / "wav", BUILD / "doc_lai_cu"
 TAM = BUILD / "_doc_lai_tam.wav"
@@ -94,7 +94,8 @@ def main(argv):
         # Chấm điểm bản đang có trước: đủ tốt thì khỏi đọc lại
         nghe_cu = nghe_nguoc(wav) if wav.exists() else None
         if nghe_cu is not None:
-            diem_cu, co_loi_cu = giong_nhau(nghe_cu, u.text), dau_hieu(u.text, nghe_cu)
+            diem_cu = giong_nhau(nghe_cu, u.text)
+            co_loi_cu = dau_hieu(u.text, nghe_cu) or lap_o_duoi(u.text, nghe_duoi(wav))
             if diem_cu >= DU_TOT and not co_loi_cu:
                 print(f"{sid} [{u.group}] bản hiện tại đạt (điểm {diem_cu:.2f}, không thấy lặp/thiếu)")
                 print(f"   nghe ra: {nghe_cu[:95]}")
@@ -118,7 +119,8 @@ def main(argv):
             sf.write(TAM, np.asarray(a, dtype=np.float32), SR, subtype="PCM_16")
             nghe = nghe_nguoc(TAM) if nghe_cu is not None else None
             diem.append(giong_nhau(nghe, u.text) if nghe is not None else -abs(durs[i] - expect))
-            co_loi.append(dau_hieu(u.text, nghe) if nghe is not None else "")
+            co_loi.append((dau_hieu(u.text, nghe) or lap_o_duoi(u.text, nghe_duoi(TAM)))
+                          if nghe is not None else "")
         # Ưu tiên bản không có dấu hiệu lặp/thiếu, nhưng CHỈ trong số bản đạt điểm tối thiểu:
         # bản đọc hỏng nặng cũng không có cụm lặp nào (ASR nghe ra khác hẳn), từng bị chọn nhầm
         # một bản điểm 0,40 thay cho bản 0,89 đang lặp.

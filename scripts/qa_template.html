@@ -143,7 +143,11 @@ function highlight(i) {
 }
 function play(i, cont) {            // seek chỉ khi người dùng chọn câu
   continuous = cont; highlight(i);
-  audio.currentTime = clips[i].b; audio.play();
+  const giay = clips[i].b;
+  const nhay = () => { audio.currentTime = giay; audio.play(); };
+  // Đổi truyện là src mới: đặt currentTime trước khi có metadata sẽ bị bỏ qua và phát từ đầu
+  if (audio.readyState >= 1) nhay();
+  else { audio.addEventListener('loadedmetadata', nhay, { once: true }); audio.load(); }
 }
 audio.ontimeupdate = () => {        // bắn mỗi ~0,25 s → khi nghe liên tục KHÔNG seek, chỉ đổi bôi sáng (seek lùi gây lặp đầu câu)
   if (clipIdx < 0) return;

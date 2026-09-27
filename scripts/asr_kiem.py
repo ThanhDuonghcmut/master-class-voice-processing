@@ -25,6 +25,40 @@ def nap_mo_hinh():
     return _asr
 
 
+DUOI_GIAY = 6.0     # độ dài đoạn đuôi câu đem nghe riêng
+
+
+def nghe_duoi(path, giay=DUOI_GIAY):
+    """Nghe riêng mấy giây CUỐI câu.
+
+    Cần thiết vì Whisper tự khử lặp khi giải mã cả câu: câu đọc thừa cụm cuối ("có khi là trách
+    mắng, có khi là trách mắng") nghe cả câu chỉ ra một lần, nghe riêng đoạn đuôi mới ra hai lần.
+    Lỗi này người nghe bắt được còn máy bỏ sót, cho tới khi thêm phép kiểm đuôi."""
+    import soundfile as sf
+    a, sr = sf.read(str(path), dtype="float32")
+    if len(a) / sr <= giay:
+        return None
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        sf.write(f.name, a[-int(giay * sr):], sr)
+        return nghe_nguoc(f.name)
+
+
+def lap_o_duoi(text, nghe_d):
+    """Dấu hiệu lặp tìm trong đoạn đuôi (chỉ xét lặp, không xét thiếu vì đuôi vốn ngắn hơn câu)."""
+    if not nghe_d:
+        return ""
+    a = [bo_thanh(w) for w in chuan(nghe_d).split()]
+    b = [bo_thanh(w) for w in chuan(text).split()]
+    for n in (6, 5, 4, 3, 2, 1):
+        if so_lan_lap(a, n) > so_lan_lap(b, n):
+            cum = cum_lap_dau(a, n)
+            if n == 1 and cum and lap_do_tach_ten(text, nghe_d, cum):
+                continue
+            return f"lặp cuối câu, cụm {n} từ" + (f" “{cum}”" if cum else "")
+    return ""
+
+
 def nghe_nguoc(path, moc_tu=False):
     """Trả văn bản ASR; moc_tu=True thì trả thêm [(từ, giây bắt đầu, giây kết thúc), …].
     Bật mốc từ làm ASR chậm thêm khoảng 25%, nhưng có mốc mới dò được ngắt nhịp sai."""
@@ -163,7 +197,7 @@ def dau_hieu(text, nghe):
     Trả về chuỗi rỗng nếu không thấy dấu hiệu nào."""
     a = [bo_thanh(w) for w in chuan(nghe).split()]
     b = [bo_thanh(w) for w in chuan(text).split()]
-    for n in (1, 2, 3, 4):
+    for n in (1, 2, 3, 4, 5, 6):
         if so_lan_lap(a, n) > so_lan_lap(b, n):
             cum = cum_lap_dau(a, n)
             if n == 1 and cum and lap_do_tach_ten(text, nghe, cum):
@@ -234,7 +268,7 @@ def dau_hieu(text, nghe):
     Trả về chuỗi rỗng nếu không thấy dấu hiệu nào."""
     a = [bo_thanh(w) for w in chuan(nghe).split()]
     b = [bo_thanh(w) for w in chuan(text).split()]
-    for n in (1, 2, 3, 4):
+    for n in (1, 2, 3, 4, 5, 6):
         if so_lan_lap(a, n) > so_lan_lap(b, n):
             cum = cum_lap_dau(a, n)
             if n == 1 and cum and lap_do_tach_ten(text, nghe, cum):
