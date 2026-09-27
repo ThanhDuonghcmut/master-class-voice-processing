@@ -299,8 +299,9 @@ def viet(d):
              "hàng nghìn, hoặc ngắt nhịp sai ở câu có cấu trúc nhập nhằng.")
     b.bullet("Cột đọc lại: đánh dấu những câu bị lặp cụm từ hoặc ngắt nhịp gượng. Công cụ sinh tiếng nói "
              "lấy mẫu ngẫu nhiên nên mỗi lần đọc cho ra một bản khác nhau; chương trình đọc lại câu đó "
-             "nhiều lần, dùng nhận dạng tiếng nói chấm điểm từng bản, ưu tiên bản không còn dấu hiệu lặp "
-             "rồi mới xét mức giống, và chỉ thay khi bản mới tốt hơn bản đang có.")
+             "nhiều lần, cho mô hình nhận dạng nghe lại từng bản rồi chấm điểm, ưu tiên bản không còn "
+             "dấu hiệu lặp, sau đó mới xét mức giống với văn bản gốc, và chỉ thay khi bản mới tốt hơn "
+             "bản đang có.")
     b.p("Có những câu đọc lại mười lần vẫn lặp, vì chính cấu trúc câu gây ra: cụm lặp nằm ở cuối một "
         "câu dài, như câu kết thúc bằng “không bao giờ, không bao giờ!” hay “phải đến nơi, phải đến "
         "nơi!”. Đổi dấu câu trong bản đọc cũng không hết. Cách chữa hiệu quả là chia câu thành mảnh ở "
