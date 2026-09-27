@@ -104,6 +104,23 @@ DOC_THEO_MANH = {
     # | cả", "cuội | sỏi"). Thêm dấu phẩy vào bản đọc không ăn thua; chia mảnh đúng ranh giới ý thì
     # chỗ nghỉ rơi vào đúng chỗ. Lỗi ngắt nhịp chỉ phát hiện được bằng tai, xem cạm bẫy 13.
     # Ngắt sai giữa cụm: chia mảnh để chỗ nghỉ rơi đúng ranh giới ý.
+    "s000338": ["Nói xong, thầy Perboni đứng lên và chỉ trên bản đồ nước Ý treo ở tường",
+                "cái điểm vẽ thành phố Reggio di Calabria."],
+    "s000345": ["Rồi ôm hôn cậu", "nồng nàn trên hai má!"],
+    "s000413": ["Đã một năm rồi",
+                "cô giáo mới lại đến đây, và tất cả mọi người trong nhà đều vui mừng đón tiếp cô."],
+    "s000421": ["Tôi tin chắc thế nào cô cũng đến nhà tôi, vì cô không bao giờ quên học trò cũ của "
+                "cô; cô nhớ tên học trò, và những ngày thi",
+                "cô đến thầy hiệu trưởng để xem họ được bao nhiêu điểm; cô còn đứng ngoài cửa phòng "
+                "thi chờ họ ra và bảo họ đem cho cô đọc những bài làm, để xem họ có tiến bộ không."],
+    "s000477": ["Con hãy hình dung trong trí tưởng tượng những học sinh ấy đang đi trên những con "
+                "đường ở nông thôn, trên những đường phố của các thành thị nhộn nhịp, dưới trời nắng gắt",
+                "hay dưới tuyết rơi, đi thuyền ở những xứ dọc ngang kinh rạch, đi ngựa qua những cánh "
+                "đồng rộng lớn, đi xe trượt trên mặt băng, qua các thung lũng và các đồi gò, qua rừng, "
+                "qua suối, trên những đường mòn hẻo lánh băng qua núi, đi một mình, đi từng đôi hay "
+                "từng tốp, thành hàng dài, tất cả đều cắp sách vở, mặc quần áo hàng nghìn kiểu, nói "
+                "nhiều thứ tiếng khác nhau, từ ngôi trường xa xôi nhất khuất nẻo trong tuyết của nước "
+                "Nga cho đến ngôi trường hẻo lánh nhất của đất Arabia núp dưới bóng cây cọ."],
     "s000226": ["Tôi vui thích thấy lại căn phòng rộng ở tầng dưới",
                 "thông với bảy lớp học, mà suốt ba năm gần như ngày nào tôi cũng đi qua."],
     "s000232": ["Tôi trông thấy thầy hiệu trưởng, mà bộ râu",
