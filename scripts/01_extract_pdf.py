@@ -79,6 +79,11 @@ SOURCE_FIXES = {
 # Câu mới mang mã "<mã câu gốc>r1", "<mã câu gốc>r2" — gắn với câu bị thay nên KHÔNG đụng dãy mã
 # "s" tuần tự (mã "s" đã nằm trong các file ghi nhận QA) và cũng không trôi khi thêm quy tắc mới
 # vào giữa danh sách; từng đánh số r0001, r0002… theo thứ tự và bị trôi đúng như vậy.
+# Hai câu liền nhau vốn là MỘT câu trong sách nhưng bị tách nhầm (dấu chú thích [n] làm pymupdf
+# cắt block giữa chừng, ví dụ tên phố "Dora | Grossa"). Gộp lại, giữ mã của câu đầu để mã các câu
+# khác không trôi; mã câu sau được ánh xạ về câu đầu cho ghi nhận QA cũ.
+GOP_CAU = [("s000305", "s000306")]
+
 RESPLIT = [
     {"thay": ["s001627", "s001628", "s001629"],
      "bang": ["- Cậu ở đây à? - Ông đại úy ngạc nhiên hỏi",
@@ -272,6 +277,34 @@ class Book:
                 "noterefs": [int(n) for n in NOTE_MARK.findall(raw)]}
 
 
+def apply_gop(data):
+    """Gộp câu thứ hai vào câu thứ nhất (kể cả khi hai câu nằm ở hai đoạn do trích sai)."""
+    data.setdefault("resplit", {})
+    for a, b in GOP_CAU:
+        vt = {}
+        for lv in data["levels"]:
+            for h in [lv, *lv["chapters"]]:
+                for p in h["paragraphs"]:
+                    for i, s in enumerate(p["sentences"]):
+                        if s["id"] in (a, b):
+                            vt[s["id"]] = (p, i, h)
+        if len(vt) != 2:
+            sys.exit(f"DỪNG: GOP_CAU {a}+{b} không tìm thấy đủ hai câu")
+        (pa, ia, ha), (pb, ib, hb) = vt[a], vt[b]
+        pa["sentences"][ia]["raw"] += " " + pb["sentences"][ib]["raw"]
+        pa["sentences"][ia]["speech"] = speech_of(pa["sentences"][ia]["raw"])
+        pa["sentences"][ia]["noterefs"] = [int(x) for x in NOTE_MARK.findall(pa["sentences"][ia]["raw"])]
+        del pb["sentences"][ib]
+        if pa is not pb and not pb["sentences"]:      # đoạn sau rỗng thì bỏ luôn
+            hb["paragraphs"].remove(pb)
+        elif pa is not pb:                            # dồn phần còn lại của đoạn sau vào đoạn trước
+            pa["sentences"].extend(pb["sentences"])
+            pb["sentences"] = []
+            hb["paragraphs"].remove(pb)
+        data["resplit"][b] = a
+        print(f"Gộp câu: {a} + {b} thành {a}")
+
+
 def apply_resplit(data):
     """Thay các câu trong RESPLIT["thay"] bằng RESPLIT["bang"], mã mới r000N.
     Ghi data["resplit"] = {mã cũ: mã mới đầu tiên} để ghi nhận QA cũ vẫn trỏ được."""
@@ -371,6 +404,7 @@ def main():
         book.end_page()
 
     data = book.finalize()
+    apply_gop(data)
     apply_resplit(data)
     apply_manh(data)
     apply_speech_fixes(data)
