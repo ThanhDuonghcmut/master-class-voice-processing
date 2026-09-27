@@ -47,7 +47,11 @@ def so_lieu():
         quet[f.stem] = rows
     src = (ROOT / "scripts" / "01_extract_pdf.py").read_text(encoding="utf-8")
     n_chinh_ta = src.count('": "', src.index("SOURCE_FIXES"), src.index("# Câu mà TTS đọc thừa"))
-    n_manh = src.count('": [', src.index("DOC_THEO_MANH"), src.index("# Chỉ đổi BẢN ĐỌC"))
+    # DOC_THEO_MANH gồm hai nhóm, ngăn bởi dòng chú thích "Ngắt sai giữa cụm"
+    i0, i1 = src.index("DOC_THEO_MANH"), src.index("# Ngắt sai giữa cụm")
+    i2 = src.index("# Chỉ đổi BẢN ĐỌC")
+    n_manh_ngat = src.count('": [', i1, i2)
+    n_manh_lap = src.count('": [', i0, i2) - n_manh_ngat
     n_resplit = src.count('{"thay":', src.index("RESPLIT = ["), src.index("# Câu mà TTS đọc thừa"))
     tong_giay = sum(v["duration"] for v in timing.values())
     tieng_doc = sum(r["sec"] for r in tts if r.get("sec"))
@@ -69,7 +73,7 @@ def so_lieu():
         "n_qa_cau": sum(len(v) for v in qa.values()),
         "so_file_sach": len(list((ROOT / "out" / meta["slug"]).iterdir())),
         "quet_cau": len(quet.get("asr_quet_casach", [])) or max((len(v) for v in quet.values()), default=0),
-        "n_manh": n_manh, "n_resplit": n_resplit,
+        "n_manh_lap": n_manh_lap, "n_manh_ngat": n_manh_ngat, "n_resplit": n_resplit,
     }
 
 
@@ -382,8 +386,10 @@ def viet(d):
     b.bullet(f'{d["n_doc_lai"]} câu bị đọc lặp cụm từ hoặc ngắt nhịp gượng đã được sinh lại.')
     b.bullet(f'{d["n_sua_doc"]} câu được chỉnh cách đọc bằng cách thêm dấu ngắt vào bản đọc, giữ nguyên chữ '
              f'trong sách.')
-    b.bullet(f'{d["n_manh"]} câu có cụm lặp ở cuối, đọc lại nhiều lần vẫn lặp, được chia mảnh khi sinh '
-             f'tiếng nói rồi nối lại thành một đoạn âm thanh.')
+    b.bullet(f'{d["n_manh_lap"]} câu có cụm lặp ở cuối, đọc lại nhiều lần vẫn lặp, được chia mảnh khi '
+             f'sinh tiếng nói rồi nối lại thành một đoạn âm thanh.')
+    b.bullet(f'{d["n_manh_ngat"]} câu bị ngắt nhịp sai giữa một cụm từ (“bản đồ nước Ý treo | ở tường”), '
+             f'cũng chia mảnh để chỗ nghỉ rơi đúng ranh giới ý.')
     b.bullet(f'{d["n_resplit"]} câu bị dính do bản điện tử thiếu dấu chấm, được tách lại thành hai câu.')
     b.p(f'Bước kiểm tự động quét toàn bộ {so(d["quet_cau"])} câu của sách trong khoảng một giờ máy, '
         f'chỉ ra những câu có dấu hiệu đọc lặp hoặc đọc thiếu để người nghe kiểm lại. Người nghe xác nhận '
