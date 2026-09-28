@@ -67,6 +67,14 @@ SOURCE_FIXES = {
     "một vờng hoa lớn": "một vòng hoa lớn",
     # Ebook chép "những ngày buồn thảm nhất"; theo mạch câu phải là "nhưng ngày buồn thảm nhất"
     "buồn thảm, những ngày buồn thảm nhất": "buồn thảm, nhưng ngày buồn thảm nhất",
+    # Sáu lỗi chép của bản số hoá; PDF gốc cũng sai, đối chiếu ngữ cảnh và cách viết đúng có sẵn
+    # trong sách để sửa
+    "người đi trên đây": "người đi trên dây",
+    "cô giáo ngoi hết": "cô giáo ngồi hết",
+    "muốn nói chuyên với": "muốn nói chuyện với",
+    "không được đánh giả": "không được đánh trả",
+    "Các cô giáo mom cười": "Các cô giáo mỉm cười",
+    "Bố lại đua tay cho cụ": "Bố lại đưa tay cho cụ",
     "De Amlcis": "De Amicis",          # OCR: i → l
     "DeAmicis rất": "De Amicis rất",   # dính hai chữ
     "Hà Lan (l874)": "Hà Lan (1874)",  # OCR: số 1 → chữ l, TTS đọc thành chữ cái
@@ -175,7 +183,12 @@ SPEECH_FIXES = {"tata": "ta-ta", "Tata": "Ta-ta",
                 "Robetti": "Rô-bét-ti",
                 # "Firenze" đọc thành "phai-ần"; tên này hiếm trong dữ liệu huấn luyện nên mô hình
                 # đoán theo lối chữ Anh, khác với "Florence" quen thuộc thì đọc đúng
-                "Firenze": "Phi-ren-giơ"}
+                "Firenze": "Phi-ren-giơ",
+                # Số La Mã: TTS đọc từng chữ cái ("i i", "cấp i") thay vì đọc như số
+                "Emanuele II": "Emanuele đệ nhị", "Napoleon III": "Napoleon đệ tam",
+                "cấp I của ta": "cấp một của ta",
+                "thế kỷ XIX": "thế kỷ mười chín", "thế kỉ XIX": "thế kỉ mười chín",
+                "thế kỷ VI": "thế kỷ thứ sáu"}
 
 
 def line_kind(line):
